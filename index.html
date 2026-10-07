@@ -51,7 +51,6 @@ p { margin: 0; }
 .parla { color: var(--cam); text-shadow: var(--cam-parlama); }
 .soluk { color: var(--sis); }
 
-/* Üst çubuk */
 .ust {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   background: rgba(2, 5, 14, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -61,15 +60,20 @@ p { margin: 0; }
 .ust .kap { display: flex; align-items: center; gap: 24px; height: 72px; }
 .ust .logo img { height: 32px; width: auto; filter: drop-shadow(0 0 8px rgba(0,240,255,0.3)); }
 .ust nav { display: flex; gap: 26px; margin-left: auto; align-items: center; }
-.ust nav a { color: var(--sis); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s, text-shadow 0.2s; }
+.ust nav a { color: var(--sis); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s, text-shadow 0.2s; white-space: nowrap; }
 .ust nav a:hover { color: var(--buz); text-shadow: 0 0 8px rgba(226,241,255,0.6); }
 
+/* Dropdown fix for Lang Switcher */
 .lang-sec {
-  background: rgba(0, 240, 255, 0.05); color: var(--cam); border: 1px solid rgba(0, 240, 255, 0.3); 
-  border-radius: 6px; padding: 6px 12px; font-family: var(--f-govde); font-size: 13px; font-weight: 600;
+  color-scheme: dark;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300F0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
+  background-color: rgba(0, 240, 255, 0.05); color: var(--cam); border: 1px solid rgba(0, 240, 255, 0.3); 
+  border-radius: 6px; padding: 6px 32px 6px 12px; font-family: var(--f-govde); font-size: 13px; font-weight: 600;
   cursor: pointer; outline: none; transition: all .2s; text-transform: uppercase;
 }
-.lang-sec:focus, .lang-sec:hover { border-color: var(--cam); box-shadow: var(--cam-parlama); background: rgba(0, 240, 255, 0.1); }
+.lang-sec:focus, .lang-sec:hover { border-color: var(--cam); box-shadow: var(--cam-parlama); background-color: rgba(0, 240, 255, 0.1); }
 .lang-sec option { background: var(--gece); color: var(--buz); }
 
 .btn {
@@ -239,12 +243,28 @@ form.kart { background: rgba(7, 16, 34, 0.6); border: 1px solid rgba(0,240,255,0
 .alan-giris { display: grid; gap: 8px; min-width: 0; }
 .alan-giris.tam { grid-column: 1 / -1; }
 label { font-size: 13px; font-weight: 600; color: var(--sis); letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* CRITICAL FIX: Form inputs, selects, and dropdown background colors for Dark Mode consistency */
 input, select, textarea {
+  color-scheme: dark; /* Force native UI (like dates and scrolls) to be dark */
   width: 100%; font: 400 16px/1.4 var(--f-govde); color: var(--buz);
   background: rgba(2, 5, 14, 0.8); border: 1px solid rgba(0,240,255,0.2); border-radius: 10px; padding: 14px 16px;
   transition: all 0.3s;
 }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cam); box-shadow: 0 0 15px rgba(0,240,255,0.2) inset, 0 0 10px rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
+
+/* Force select arrow to be custom to prevent browser hijacking background styles */
+select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300F0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+/* Explicitly style the options so they don't default to white on Light Mode OS */
+option { background: var(--gece); color: var(--buz); }
+
 textarea { resize: vertical; min-height: 120px; }
 .form-alt { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between; margin-top: 8px; }
 .form-alt small { color: var(--sis); font-size: 12.5px; max-width: 40ch; }
@@ -259,43 +279,6 @@ footer a:hover { color: var(--cam); text-shadow: 0 0 8px rgba(0,240,255,0.5); }
 footer h4 { font: 600 13px/1 var(--f-baslik); letter-spacing: .2em; text-transform: uppercase; color: var(--buz); margin: 0 0 20px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
 .telif { grid-column: 1 / -1; padding-top: 26px; border-top: 1px solid rgba(0,240,255,0.1); font-size: 13px; color: var(--sis); text-align: center; }
 
-/* Modal - Glassmorphism Gizlilik Politikası */
-.modal {
-  position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
-  padding: 20px; background: rgba(2, 5, 14, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  opacity: 0; pointer-events: none; transition: opacity .4s ease;
-}
-.modal.acik { opacity: 1; pointer-events: auto; }
-.modal-icerik {
-  background: rgba(7, 16, 34, 0.7); border: 1px solid rgba(0,240,255,0.3); border-radius: 24px;
-  width: 100%; max-width: 750px; max-height: 85vh; display: flex; flex-direction: column;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,240,255,0.1);
-  transform: translateY(30px) scale(0.98); transition: transform .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.modal.acik .modal-icerik { transform: translateY(0) scale(1); }
-.modal-baslik {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 24px 32px; border-bottom: 1px solid rgba(0,240,255,0.2);
-  background: rgba(0,240,255,0.03); border-radius: 24px 24px 0 0;
-}
-.modal-baslik h3 { font-size: 24px; margin: 0; color: var(--cam); text-shadow: 0 0 10px rgba(0,240,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
-.modal-kapat {
-  background: rgba(255,0,85,0.1); border: 1px solid rgba(255,0,85,0.3); color: #FF0055; 
-  width: 36px; height: 36px; border-radius: 50%; font-size: 24px; display: grid; place-items: center;
-  cursor: pointer; padding: 0; line-height: 1; transition: all .2s; box-shadow: 0 0 10px rgba(255,0,85,0.1);
-}
-.modal-kapat:hover { background: #FF0055; color: var(--gece); box-shadow: 0 0 15px rgba(255,0,85,0.5); transform: rotate(90deg); }
-.modal-govde { padding: 32px; overflow-y: auto; color: var(--sis); font-size: 15px; line-height: 1.7; }
-.modal-govde::-webkit-scrollbar { width: 6px; }
-.modal-govde::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 3px; }
-.modal-govde::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.3); border-radius: 3px; }
-.modal-govde::-webkit-scrollbar-thumb:hover { background: var(--cam); }
-.modal-govde h4 { color: var(--buz); margin: 28px 0 12px; font-family: var(--f-baslik); font-size: 20px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid rgba(0,240,255,0.1); padding-bottom: 8px; }
-.modal-govde h4:first-child { margin-top: 0; }
-.modal-govde ul { padding-inline-start: 24px; margin-bottom: 24px; }
-.modal-govde li { margin-bottom: 10px; }
-.modal-govde strong { color: var(--cam); font-weight: 600; text-shadow: 0 0 5px rgba(0,240,255,0.2); }
-
 html[dir="rtl"] .ust nav { margin-left: 0; margin-right: auto; }
 html[dir="rtl"] .sss summary { padding: 24px 0 24px 44px; }
 html[dir="rtl"] .sss summary::after { right: auto; left: 6px; transform: rotate(-45deg); border-right: none; border-left: 2px solid var(--cam); }
@@ -303,6 +286,8 @@ html[dir="rtl"] .sss details[open] summary::after { transform: rotate(45deg); bo
 html[dir="rtl"] .sss details p { padding: 0 0 24px 44px; }
 html[dir="rtl"] .alan + .alan { border-left: none; border-right: 1px solid rgba(0,240,255,0.2); padding-left: 0; padding-right: 32px; }
 html[dir="rtl"] .btn .iki-satir { text-align: right; }
+html[dir="rtl"] select { background-position: left 16px center; padding-right: 16px; padding-left: 40px; }
+html[dir="rtl"] .lang-sec { background-position: left 10px center; padding-right: 12px; padding-left: 32px; }
 
 @media (max-width: 960px) {
   .ust nav { display: none; }
@@ -339,6 +324,7 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
       <a href="#ozellikler" data-i18n="nav_feat">Özellikler</a>
       <a href="#uyarilar" data-i18n="nav_alerts">Uyarılar</a>
       <a href="#kurulum" data-i18n="nav_setup">Kurulum</a>
+      <a href="gizlilik.html" data-i18n="nav_gizlilik">Gizlilik Politikası</a>
       <a href="#sss" data-i18n="nav_faq">SSS</a>
       <select id="lang-switcher" class="lang-sec">
         <option value="tr">TR</option>
@@ -707,46 +693,11 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
     <div>
       <h4 data-i18n="ft_corp" style="color:var(--cam);">Yasal & Kurumsal</h4>
       <a href="https://kolleksan.com" rel="noopener">kolleksan.com</a>
-      <a href="#" id="ac-gizlilik" data-i18n="ft_priv">Gizlilik Politikası & Veri Koruma</a>
+      <a href="gizlilik.html" data-i18n="ft_priv">Gizlilik Politikası & Veri Koruma</a>
     </div>
     <p class="telif" data-i18n="ft_copy">© 2026 Kolleksan İnovasyon Mühendislik A.Ş. Tüm hakları saklıdır.</p>
   </div>
 </footer>
-
-<div id="gizlilik-modal" class="modal">
-  <div class="modal-icerik">
-    <div class="modal-baslik">
-      <h3 data-i18n="m_title">Veri Gizliliği (GDPR & CCPA)</h3>
-      <button class="modal-kapat" aria-label="Kapat" id="kapat-gizlilik">&times;</button>
-    </div>
-    <div class="modal-govde">
-      <p><strong data-i18n="m_upd">Son Güvenlik Güncellemesi:</strong> Ekim 2026</p>
-      <p data-i18n="m_intro">Kolleksan olarak, Hydra Ctrl IoT altyapısı üzerinden toplanan telemetri ve ağ verilerinizin şifrelenmesine ve korunmasına en üst düzeyde önem veriyoruz. Bu mimari, uluslararası veri standartlarına (Avrupa GDPR ve Amerika Kaliforniya CCPA/CPRA) sıkı sıkıya uyumludur.</p>
-      
-      <h4 data-i18n="m_h1">1. Toplanan Sensör ve Ağ Verileri</h4>
-      <ul>
-        <li data-i18n="m_l1_1"><strong>Telemetri:</strong> Su seviyesi, sıvı/ortam sıcaklığı, bağıl nem, kızılötesi alev tespiti ve ultrasonik/PIR hareket verileri.</li>
-        <li data-i18n="m_l1_2"><strong>Ağ Logları:</strong> ESP32 modülünün Wi-Fi/BLE bağlantı durumu, cihaz IP/MAC adresi ve uptime süreleri.</li>
-        <li data-i18n="m_l1_3"><strong>Kullanıcı Hashing:</strong> Uygulamaya giriş için kullanılan kriptolanmış hesap ve bildirim tokenları.</li>
-      </ul>
-
-      <h4 data-i18n="m_h2">2. Avrupa Birliği (GDPR) Uyumluluğu</h4>
-      <ul>
-        <li data-i18n="m_l2_1"><strong>Unutulma Hakkı (Right to Erasure - Art. 17):</strong> Hesabınızı silmeniz durumunda, ağınızdaki cihazın oluşturduğu tüm geçmiş sensör verileri 30 gün içinde geri döndürülemez (shredding) şekilde bulut sistemden temizlenir.</li>
-        <li data-i18n="m_l2_2"><strong>Veri Taşınabilirliği (Data Portability):</strong> Uygulama üzerinden tesisinize ait sensör loglarını yapılandırılmış formatlarda (CSV/JSON) dışa aktarabilirsiniz.</li>
-      </ul>
-
-      <h4 data-i18n="m_h3">3. Amerika Birleşik Devletleri (CCPA/CPRA) Uyumluluğu</h4>
-      <ul>
-        <li data-i18n="m_l3_1"><strong>Kişisel Bilgi Satışının Reddi (Do Not Sell My Info):</strong> Kolleksan, topladığı IoT ağ verilerini veya kişisel bilgilerinizi hiçbir veri analiz firmasına, komisyoncuya veya üçüncü tarafa kesinlikle <strong>satmaz veya kiralamaz.</strong></li>
-        <li data-i18n="m_l3_2"><strong>Ayrımcılık Yapmama İlkesi:</strong> CCPA haklarınızı kullandığınız için IoT sunucu erişim hızınızda veya bildirim önceliğinizde kısıtlama yapılmaz.</li>
-      </ul>
-
-      <h4 data-i18n="m_h4">4. Kriptografi ve Uçtan Uca Güvenlik</h4>
-      <p data-i18n="m_sec">Donanım ile bulut sunucu, sunucu ile mobil uygulamanız arasındaki tüm veri transferi AES-256 bit şifreleme ve <strong>TLS 1.3</strong> protokolü ile korunur. Veri merkezlerimiz ISO/IEC 27001 bilgi güvenliği sertifikasyonlarına sahiptir.</p>
-    </div>
-  </div>
-</div>
 
 <script>
 (function () {
@@ -803,29 +754,10 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
     durum.textContent = langSwitcher.value === 'tr' ? 'Bu bir önizleme. Şifreli veri iletildi simüle ediliyor.' : 'Preview: Encrypted data transmission simulated.';
   });
 
-  // Modal logic
-  var modal = document.getElementById('gizlilik-modal');
-  var btnAc = document.getElementById('ac-gizlilik');
-  var btnKapat = document.getElementById('kapat-gizlilik');
-
-  btnAc.addEventListener('click', function(e) {
-    e.preventDefault();
-    modal.classList.add('acik');
-    document.body.style.overflow = 'hidden';
-  });
-  
-  function kapatModal() {
-    modal.classList.remove('acik');
-    document.body.style.overflow = '';
-  }
-  btnKapat.addEventListener('click', kapatModal);
-  modal.addEventListener('click', function(e) { if(e.target === modal) kapatModal(); });
-  document.addEventListener('keydown', function(e) { if(e.key === 'Escape' && modal.classList.contains('acik')) kapatModal(); });
-
   // Localization Dictionary (4 Languages)
   const dict = {
     tr: {
-      nav_feat: "Özellikler", nav_alerts: "Uyarılar", nav_setup: "Kurulum", nav_faq: "SSS", nav_quote: "Teklif Alın",
+      nav_feat: "Özellikler", nav_alerts: "Uyarılar", nav_setup: "Kurulum", nav_gizlilik: "Gizlilik Politikası", nav_faq: "SSS", nav_quote: "Teklif Alın",
       hero_badge: "Kolleksan Su Depoları İçin", hero_title: "<span>Ölç. İzle.</span><span class='parla'>Kontrol et.</span>",
       hero_desc: "Hydra Ctrl, deponuza takılan akıllı bir IoT cihazı ve ona bağlı bir uygulamadır. Su seviyesi, sıcaklık, nem, alev ve hareketi milisaniyeler içinde ölçer; sınır aşıldığında telefonunuza şifreli bildirim gönderir.",
       hero_dl: "Uygulamayı indirin", hero_ios: "iOS sürümü hazırlanıyor.",
@@ -870,15 +802,10 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
       c_email: "E-posta", c_phone: "Telefon", c_address: "Adres", c_copy: "Kopyala",
       f_name: "Ad soyad", f_firm: "Firma / site adı (isteğe bağlı)", f_phone: "Telefon", f_email: "E-posta", f_use: "Kullanım yeri", f_count: "Depo sayısı", f_msg: "Mesajınız", f_note: "Bilgileriniz yalnızca teklif hazırlamak için kullanılır.", f_btn: "Teklif iste",
       f_use_1: "Müstakil ev / yazlık", f_use_2: "Apartman / site", f_use_3: "İşletme / tesis", f_use_4: "Bayi / satıcı",
-      ft_dev: "Hydra Ctrl, Kolleksan İnovasyon Mühendislik A.Ş. tarafından geliştirilmiştir.", ft_corp: "Yasal & Kurumsal", ft_priv: "Gizlilik Politikası & Veri Koruma", ft_copy: "© 2026 Kolleksan İnovasyon Mühendislik A.Ş. Tüm hakları saklıdır.",
-      m_title: "Veri Gizliliği (GDPR & CCPA)", m_upd: "Son Güvenlik Güncellemesi:", m_intro: "Kolleksan olarak, Hydra Ctrl IoT altyapısı üzerinden toplanan telemetri ve ağ verilerinizin şifrelenmesine ve korunmasına en üst düzeyde önem veriyoruz. Bu mimari, uluslararası veri standartlarına (Avrupa GDPR ve Amerika Kaliforniya CCPA/CPRA) sıkı sıkıya uyumludur.",
-      m_h1: "1. Toplanan Sensör ve Ağ Verileri", m_l1_1: "<strong>Telemetri:</strong> Su seviyesi, sıvı/ortam sıcaklığı, nem, kızılötesi alev tespiti ve ultrasonik/PIR hareket verileri.", m_l1_2: "<strong>Ağ Logları:</strong> ESP32 modülünün Wi-Fi/BLE bağlantı durumu, cihaz IP/MAC adresi ve uptime.", m_l1_3: "<strong>Kullanıcı Hashing:</strong> Giriş için kullanılan kriptolanmış hesap ve bildirim tokenları.",
-      m_h2: "2. Avrupa Birliği (GDPR) Uyumluluğu", m_l2_1: "<strong>Unutulma Hakkı:</strong> Hesabınızı silmeniz durumunda veriler shredding ile yok edilir.", m_l2_2: "<strong>Veri Taşınabilirliği:</strong> Telemetri geçmişini CSV/JSON formatında alabilirsiniz.",
-      m_h3: "3. Amerika (CCPA/CPRA) Uyumluluğu", m_l3_1: "<strong>Kişisel Bilgi Satışının Reddi:</strong> Verileriniz üçüncü taraflara kesinlikle satılmaz.", m_l3_2: "<strong>Ayrımcılık Yapmama:</strong> Haklarınızı kullandığınız için IoT erişiminiz yavaşlatılmaz.",
-      m_h4: "4. Kriptografi ve Uçtan Uca Güvenlik", m_sec: "Tüm transfer AES-256 bit şifreleme ve TLS 1.3 ile korunur. Sunucularımız ISO/IEC 27001 onaylıdır."
+      ft_dev: "Hydra Ctrl, Kolleksan İnovasyon Mühendislik A.Ş. tarafından geliştirilmiştir.", ft_corp: "Yasal & Kurumsal", ft_priv: "Gizlilik Politikası & Veri Koruma", ft_copy: "© 2026 Kolleksan İnovasyon Mühendislik A.Ş. Tüm hakları saklıdır."
     },
     en: {
-      nav_feat: "Features", nav_alerts: "Alerts", nav_setup: "Setup", nav_faq: "FAQ", nav_quote: "Get Quote",
+      nav_feat: "Features", nav_alerts: "Alerts", nav_setup: "Setup", nav_gizlilik: "Privacy Policy", nav_faq: "FAQ", nav_quote: "Get Quote",
       hero_badge: "For Kolleksan Water Tanks", hero_title: "<span>Measure. Monitor.</span><span class='parla'>Control.</span>",
       hero_desc: "Hydra Ctrl is an advanced IoT module attached to your tank. It tracks water level, temp, humidity, flame, and motion in milliseconds; alerting your phone via encrypted push notifications.",
       hero_dl: "Download App", hero_ios: "iOS version incoming.",
@@ -923,15 +850,10 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
       c_email: "Email", c_phone: "Phone", c_address: "Address", c_copy: "Copy",
       f_name: "Full Name", f_firm: "Company / Site name (optional)", f_phone: "Phone", f_email: "Email", f_use: "Usage Area", f_count: "Tank Count", f_msg: "Your Message", f_note: "Your information is only used to prepare a quote.", f_btn: "Request Quote",
       f_use_1: "Villa / Home", f_use_2: "Apartment / Complex", f_use_3: "Business / Facility", f_use_4: "Dealer / Seller",
-      ft_dev: "Hydra Ctrl is engineered by Kolleksan Innovation Engineering.", ft_corp: "Legal & Corp", ft_priv: "Data Protection & Privacy", ft_copy: "© 2026 Kolleksan Innovation Engineering. All rights reserved.",
-      m_title: "Data Privacy (GDPR & CCPA)", m_upd: "Last Security Patch:", m_intro: "We prioritize the encryption of all IoT telemetry. Architecture complies with global privacy mandates.",
-      m_h1: "1. Data Gathered", m_l1_1: "<strong>Telemetry:</strong> Water level, temp, humidity, flame, PIR motion.", m_l1_2: "<strong>Network Logs:</strong> ESP32 MAC/IP, BLE status, uptime.", m_l1_3: "<strong>User Hashing:</strong> Encrypted tokens for auth and push.",
-      m_h2: "2. GDPR (EU) Compliance", m_l2_1: "<strong>Right to Erasure:</strong> Account deletion triggers server shredding within 30 days.", m_l2_2: "<strong>Portability:</strong> Export node history as JSON/CSV.",
-      m_h3: "3. CCPA (USA) Compliance", m_l3_1: "<strong>Do Not Sell:</strong> We NEVER broker or sell telemetry data.", m_l3_2: "<strong>No Discrimination:</strong> Invoking CCPA does not throttle your IoT ping rate.",
-      m_h4: "4. Cryptography", m_sec: "Node-to-cloud packets run on AES-256 and TLS 1.3. Servers are ISO/IEC 27001 compliant."
+      ft_dev: "Hydra Ctrl is engineered by Kolleksan Innovation Engineering.", ft_corp: "Legal & Corp", ft_priv: "Data Protection & Privacy", ft_copy: "© 2026 Kolleksan Innovation Engineering. All rights reserved."
     },
     fr: {
-      nav_feat: "Fonctions", nav_alerts: "Alertes", nav_setup: "Réseau", nav_faq: "FAQ", nav_quote: "Devis",
+      nav_feat: "Fonctions", nav_alerts: "Alertes", nav_setup: "Réseau", nav_gizlilik: "Politique de Confidentialité", nav_faq: "FAQ", nav_quote: "Devis",
       hero_badge: "Pour Réservoirs Kolleksan", hero_title: "<span>Mesurer. Suivre.</span><span class='parla'>Contrôler.</span>",
       hero_desc: "Module IoT avancé. Suit le niveau, temp, humidité, feu en millisecondes; alertes cryptées.",
       hero_dl: "Télécharger l'App", hero_ios: "Version iOS en cours.",
@@ -976,15 +898,10 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
       c_email: "Email", c_phone: "Téléphone", c_address: "Adresse", c_copy: "Copier",
       f_name: "Nom complet", f_firm: "Société (optionnel)", f_phone: "Tél", f_email: "Email", f_use: "Utilisation", f_count: "Nombre de réservoirs", f_msg: "Message", f_note: "Connexion sécurisée TLS.", f_btn: "Demander",
       f_use_1: "Maison / Villa", f_use_2: "Appartement", f_use_3: "Industrie", f_use_4: "Revendeur",
-      ft_dev: "Développé par Kolleksan Innovation Engineering.", ft_corp: "Légal & Corp", ft_priv: "Politique de confidentialité", ft_copy: "© 2026 Kolleksan Innovation. Tous droits réservés.",
-      m_title: "Confidentialité (RGPD & CCPA)", m_upd: "Patch Sécurité :", m_intro: "Priorité au cryptage IoT. Conforme aux mandats mondiaux.",
-      m_h1: "1. Données", m_l1_1: "<strong>Télémétrie:</strong> Niveau, temp, feu, mouvement.", m_l1_2: "<strong>Logs:</strong> MAC/IP ESP32, statut BLE.", m_l1_3: "<strong>Hashing:</strong> Tokens cryptés pour l'authentification.",
-      m_h2: "2. Conformité RGPD", m_l2_1: "<strong>Droit à l'oubli:</strong> Données broyées sous 30 jours après suppression.", m_l2_2: "<strong>Portabilité:</strong> Export en JSON/CSV.",
-      m_h3: "3. Conformité CCPA", m_l3_1: "<strong>Ne pas vendre:</strong> Télémétrie jamais vendue.", m_l3_2: "<strong>Non-discrimination:</strong> Pas de bridage IoT.",
-      m_h4: "4. Cryptographie", m_sec: "Paquets AES-256 et TLS 1.3. Serveurs ISO 27001."
+      ft_dev: "Développé par Kolleksan Innovation Engineering.", ft_corp: "Légal & Corp", ft_priv: "Politique de confidentialité", ft_copy: "© 2026 Kolleksan Innovation. Tous droits réservés."
     },
     ar: {
-      nav_feat: "الميزات", nav_alerts: "الإنذارات", nav_setup: "الشبكة", nav_faq: "الأسئلة", nav_quote: "تسعير",
+      nav_feat: "الميزات", nav_alerts: "الإنذارات", nav_setup: "الشبكة", nav_gizlilik: "سياسة الخصوصية", nav_faq: "الأسئلة", nav_quote: "تسعير",
       hero_badge: "لخزانات كوليكسان", hero_title: "<span>قِس. راقب.</span><span class='parla'>تحكم.</span>",
       hero_desc: "وحدة IoT متقدمة. تقيس المستويات، الحرارة، اللهب بالمللي ثانية؛ وتنبهك بإشعارات مشفرة.",
       hero_dl: "حمل التطبيق", hero_ios: "نسخة iOS قريباً.",
@@ -1029,12 +946,7 @@ html[dir="rtl"] .btn .iki-satir { text-align: right; }
       c_email: "بريد", c_phone: "هاتف", c_address: "عنوان", c_copy: "نسخ",
       f_name: "الاسم", f_firm: "الشركة", f_phone: "هاتف", f_email: "إيميل", f_use: "الاستخدام", f_count: "العدد", f_msg: "رسالة", f_note: "معلوماتك تستخدم فقط لإعداد العرض.", f_btn: "إرسال الطلب",
       f_use_1: "منزل", f_use_2: "مجمع", f_use_3: "مصنع", f_use_4: "تاجر",
-      ft_dev: "هندسة كوليكسان للابتكار.", ft_corp: "قانوني", ft_priv: "حماية البيانات", ft_copy: "© 2026 كوليكسان للابتكار. جميع الحقوق محفوظة.",
-      m_title: "الخصوصية (GDPR & CCPA)", m_upd: "تحديث أمني:", m_intro: "التشفير أولويتنا. بنيتنا متوافقة مع القوانين العالمية.",
-      m_h1: "1. البيانات", m_l1_1: "<strong>القياس:</strong> مستوى، حرارة، لهب.", m_l1_2: "<strong>سجلات:</strong> حالة الشبكة.", m_l1_3: "<strong>تشفير:</strong> توكن للمصادقة.",
-      m_h2: "2. قوانين GDPR", m_l2_1: "<strong>النسيان:</strong> حذف آمن للبيانات خلال 30 يوم.", m_l2_2: "<strong>نقل:</strong> تصدير كـ JSON.",
-      m_h3: "3. قوانين CCPA", m_l3_1: "<strong>عدم البيع:</strong> لا نبيع البيانات أبداً.", m_l3_2: "<strong>لا تمييز:</strong> لا نبطئ استجابة النظام.",
-      m_h4: "4. التشفير", m_sec: "نستخدم AES-256 و TLS 1.3. خوادم ISO 27001."
+      ft_dev: "هندسة كوليكسان للابتكار.", ft_corp: "قانوني", ft_priv: "حماية البيانات", ft_copy: "© 2026 كوليكسان للابتكار. جميع الحقوق محفوظة."
     }
   };
 
