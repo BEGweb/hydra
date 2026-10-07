@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydra Ctrl</title>
+<meta name="description" content="Hydra Ctrl: Akıllı su deposu takibi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: dark;
+  --gece: #02050E;
+  --gece-2: #071022;
+  --gece-3: #112240;
+  --buz: #E2F1FF;
+  --sis: #8FA3C4;
+  --cam: #00F0FF;
+  --cam-yumusak: rgba(0, 240, 255, 0.12);
+  --cam-parlama: 0 0 15px rgba(0, 240, 255, 0.4), 0 0 30px rgba(0, 240, 255, 0.2);
+  --alev: #FF0055;
+  --amber: #FFB300;
+  --f-baslik: "Rajdhani", "Arial Narrow", system-ui, sans-serif;
+  --f-govde: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-lcd: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --genislik: 1200px;
+  --kenar: clamp(16px, 4vw, 40px);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--gece); color: var(--buz);
+  font: 400 16px/1.65 var(--f-govde);
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.05), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(255, 0, 85, 0.03), transparent 25%);
+}
+a { color: var(--cam); transition: text-shadow 0.3s; }
+a:hover { text-shadow: var(--cam-parlama); }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 2px solid var(--cam); outline-offset: 3px; border-radius: 4px; box-shadow: var(--cam-parlama); }
+.kap { max-width: var(--genislik); margin-inline: auto; padding-inline: var(--kenar); }
+h1, h2, h3 { font-family: var(--f-baslik); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: 0.02em; }
+h2 { font-size: clamp(34px, 5vw, 56px); }
+h3 { font-size: 22px; font-weight: 600; line-height: 1.15; }
+p { margin: 0; }
+
+.ust-etiket { font: 600 13px/1 var(--f-baslik); letter-spacing: .32em; text-transform: uppercase; color: var(--cam); text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+.parla { color: var(--cam); text-shadow: var(--cam-parlama); }
+.soluk { color: var(--sis); }
+
+.ust {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: rgba(2, 5, 14, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+.ust .kap { display: flex; align-items: center; gap: 24px; height: 72px; }
+.ust .logo img { height: 32px; width: auto; filter: drop-shadow(0 0 8px rgba(0,240,255,0.3)); }
+.ust nav { display: flex; gap: 26px; margin-left: auto; align-items: center; }
+.ust nav a { color: var(--sis); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s, text-shadow 0.2s; white-space: nowrap; }
+.ust nav a:hover { color: var(--buz); text-shadow: 0 0 8px rgba(226,241,255,0.6); }
+
+/* Dropdown fix for Lang Switcher */
+.lang-sec {
+  color-scheme: dark;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300F0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
+  background-color: rgba(0, 240, 255, 0.05); color: var(--cam); border: 1px solid rgba(0, 240, 255, 0.3); 
+  border-radius: 6px; padding: 6px 32px 6px 12px; font-family: var(--f-govde); font-size: 13px; font-weight: 600;
+  cursor: pointer; outline: none; transition: all .2s; text-transform: uppercase;
+}
+.lang-sec:focus, .lang-sec:hover { border-color: var(--cam); box-shadow: var(--cam-parlama); background-color: rgba(0, 240, 255, 0.1); }
+.lang-sec option { background: var(--gece); color: var(--buz); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font: 600 15px/1 var(--f-govde); text-decoration: none; cursor: pointer;
+  padding: 14px 24px; border-radius: 8px; border: 1px solid transparent; white-space: nowrap;
+  transition: all .3s ease; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.btn-cam { background: var(--cam); color: var(--gece); box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+.btn-cam:hover { background: #33F3FF; transform: translateY(-2px); box-shadow: var(--cam-parlama); }
+.btn-hat { border-color: rgba(0,240,255,0.4); color: var(--cam); background: rgba(0,240,255,0.05); }
+.btn-hat:hover { border-color: var(--cam); background: rgba(0,240,255,0.1); box-shadow: 0 0 15px rgba(0,240,255,0.2) inset, 0 0 15px rgba(0,240,255,0.2); transform: translateY(-2px); }
+.btn-kucuk { padding: 10px 18px; font-size: 13px; }
+.btn svg { width: 22px; height: 22px; flex: none; }
+.btn small { display: block; font: 500 11px/1.2 var(--f-govde); opacity: .8; letter-spacing: 0; text-transform: none; }
+.btn .iki-satir { text-align: left; line-height: 1.15; }
+
+.hero { position: relative; overflow: hidden; padding-block: clamp(60px, 8vw, 100px) clamp(70px, 8vw, 120px); }
+.hero::before {
+  content: ""; position: absolute; inset: -30% -20% auto auto; width: 80vw; height: 80vw; max-width: 1000px; max-height: 1000px;
+  background: radial-gradient(closest-side, rgba(0,240,255,.1), transparent 70%); pointer-events: none;
+}
+.hero .kap { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hero h1 { font-size: clamp(52px, 7.2vw, 96px); text-transform: uppercase; line-height: .92; margin-block: 22px 26px; }
+.hero h1 span { display: block; }
+.hero .giris { font-size: clamp(17px, 1.6vw, 19px); color: var(--sis); max-width: 34em; }
+.hero .eylem { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 36px; }
+.hero .not { margin-top: 20px; font-size: 13px; color: var(--sis); }
+
+.sahne { position: relative; padding-bottom: 92px; }
+.sahne svg { width: 100%; height: auto; display: block; overflow: visible; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8)); }
+.sahne .dalga { animation: dalga 6s linear infinite; }
+.sahne .dalga.iki { animation-duration: 9s; animation-direction: reverse; }
+@keyframes dalga { to { transform: translateX(120px); } }
+.sahne .ses { animation: ses 2.4s ease-out infinite; opacity: 0; }
+.sahne .ses:nth-of-type(2) { animation-delay: .8s; }
+.sahne .ses:nth-of-type(3) { animation-delay: 1.6s; }
+@keyframes ses { 0% { opacity: 0; transform: translateY(-8px); } 25% { opacity: .9; } 100% { opacity: 0; transform: translateY(46px); } }
+.sahne .led { animation: nabiz 2s infinite; }
+.sahne text { font-family: var(--f-lcd); font-size: 12px; fill: var(--sis); }
+
+.lcd {
+  position: absolute; left: 6%; right: 6%; bottom: 0;
+  background: rgba(2, 5, 14, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, .4); border-radius: 12px; padding: 16px 20px;
+  font: 400 14px/1.75 var(--f-lcd); color: var(--cam); font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 20px rgba(0, 240, 255, .15) inset, 0 10px 30px rgba(0,0,0,0.6);
+}
+.lcd .satir { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(0,240,255,0.1); padding-bottom: 4px; margin-bottom: 4px; }
+.lcd .satir:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+.lcd .satir span { color: var(--buz); opacity: 0.8; }
+.lcd .satir b { font-weight: 500; color: var(--cam); text-shadow: 0 0 8px rgba(0,240,255,0.5); }
+.lcd .baslik { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--sis); margin-bottom: 10px; }
+.lcd .canli::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FF0055; margin-right: 8px; box-shadow: 0 0 10px #FF0055; animation: nabiz 1.5s infinite; }
+@keyframes nabiz { 50% { opacity: .4; } }
+
+.bolum { padding-block: clamp(70px, 10vw, 130px); border-top: 1px solid rgba(0,240,255,0.1); position: relative; }
+.bolum::before { content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:50%; height:1px; background:linear-gradient(90deg, transparent, var(--cam), transparent); opacity: 0.3; }
+.bolum-bas { display: grid; gap: 18px; max-width: 720px; margin-bottom: clamp(40px, 6vw, 70px); }
+.bolum-bas p { color: var(--sis); font-size: 18px; }
+
+.ceb { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(32px, 6vw, 88px); align-items: center; }
+
+.tel {
+  width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 9 / 18.6;
+  border-radius: 44px; padding: 10px; background: #010205; border: 1px solid #112240;
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,1), 0 0 40px rgba(0,240,255,.15);
+  position: relative;
+}
+.tel::after { content:""; position:absolute; inset:0; border-radius:44px; border:1px solid rgba(0,240,255,0.2); pointer-events:none; }
+.tel-ekran {
+  position: relative; height: 100%; border-radius: 35px; overflow: hidden;
+  background: var(--gece-2); display: flex; flex-direction: column;
+  font-size: 11px; line-height: 1.35; color: var(--buz);
+}
+.tel-ekran::before { content: ""; position: absolute; top: 9px; left: 50%; width: 84px; height: 24px; margin-left: -42px; border-radius: 14px; background: #010205; z-index: 2; border-bottom: 1px solid rgba(0,240,255,0.1); }
+.tel-durum { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px 0; height: 40px; font: 600 12px/1 var(--f-govde); color: var(--sis); }
+.tel-durum i { display: inline-flex; gap: 3px; align-items: flex-end; }
+.tel-durum i b { width: 3px; background: var(--sis); border-radius: 1px; }
+.tel-baslik { display: flex; align-items: center; gap: 10px; padding: 10px 16px 8px; font: 600 14px/1.2 var(--f-baslik); letter-spacing: .02em; color: var(--cam); text-shadow: 0 0 5px rgba(0,240,255,0.3); }
+.tel-baslik span { color: var(--sis); font-size: 16px; text-shadow: none; }
+.tel-govde { flex: 1; display: grid; gap: 8px; align-content: start; padding: 4px 12px; min-height: 0; }
+.tel-kart { background: rgba(0,240,255,0.03); border: 1px solid rgba(0,240,255,0.15); border-radius: 12px; padding: 10px 12px; min-width: 0; box-shadow: inset 0 0 10px rgba(0,240,255,0.02); }
+.tel-etk { font: 500 8.5px/1 var(--f-govde); letter-spacing: .14em; text-transform: uppercase; color: var(--sis); }
+.tel-seviye { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: start; }
+.tel-seviye .yuzde { font: 700 30px/1 var(--f-baslik); color: var(--cam); margin-top: 4px; font-variant-numeric: tabular-nums; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+.tel-seviye .kap-yazi { font-size: 9px; color: var(--sis); font-variant-numeric: tabular-nums; }
+.tel-seviye .hap { font: 600 8px/1 var(--f-govde); letter-spacing: .1em; color: var(--buz); border: 1px solid rgba(0,240,255,0.5); border-radius: 4px; padding: 4px 6px; justify-self: end; background: rgba(0,240,255,0.1); }
+.silindir { grid-column: 1 / -1; justify-self: center; position: relative; width: 82px; height: 118px; margin-block: 8px 2px; border-radius: 41px / 12px; background: rgba(255,255,255,.02); border: 1px solid rgba(0,240,255,.3); overflow: hidden; box-shadow: 0 0 15px rgba(0,240,255,0.1); }
+.silindir .dolu { position: absolute; left: 0; right: 0; bottom: 0; height: var(--doluluk, 74%); background: linear-gradient(90deg, #005E80, #00E5FF 45%, #005E80); transition: height 1.2s ease; box-shadow: 0 -5px 10px rgba(0,240,255,0.4); }
+.silindir .dolu::before { content: ""; position: absolute; left: 0; right: 0; top: -7px; height: 14px; border-radius: 50%; background: #99F6FF; opacity: .9; box-shadow: 0 0 10px #00E5FF; }
+.tel-izgara { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tel-izgara .deger { font: 600 15px/1.1 var(--f-baslik); margin-top: 6px; font-variant-numeric: tabular-nums; color: var(--buz); }
+.tel-aktif { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tel-aktif div { font-size: 9px; color: var(--sis); }
+.tel-aktif b { display: block; color: #00FF88; font-weight: 600; margin-top: 3px; text-shadow: 0 0 5px rgba(0,255,136,0.4); }
+.tel-aktif b::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #00FF88; margin-right: 5px; vertical-align: 1px; box-shadow: 0 0 5px #00FF88; }
+.tel-menu { display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px 8px 18px; border-top: 1px solid rgba(0,240,255,0.1); font-size: 9px; color: var(--sis); text-align: center; background: #040914; }
+.tel-menu span::before { content: ""; display: block; width: 16px; height: 16px; margin: 0 auto 4px; border-radius: 5px; border: 1.5px solid currentColor; }
+.tel-menu .secili { color: var(--cam); text-shadow: 0 0 5px rgba(0,240,255,0.5); }
+.tel-menu .secili::before { background: rgba(0,240,255,0.2); border-color: var(--cam); box-shadow: 0 0 8px rgba(0,240,255,0.4); }
+
+.ozellik-liste { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 36px; margin-top: 40px; }
+.ozellik { display: grid; gap: 10px; min-width: 0; }
+.ozellik .ikon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(0,240,255,0.08); color: var(--cam); border: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 15px rgba(0,240,255,0.1); }
+.ozellik .ikon svg { width: 22px; height: 22px; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); }
+.ozellik p { color: var(--sis); font-size: 15px; }
+
+.uyari-duzen { display: grid; grid-template-columns: 1fr 300px; gap: clamp(28px, 4vw, 56px); align-items: start; }
+.uyari-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(0,240,255,0.2); border: 1px solid rgba(0,240,255,0.2); border-radius: 18px; overflow: hidden; box-shadow: 0 0 30px rgba(0,240,255,0.05); }
+.uyari { background: var(--gece-2); padding: 24px 24px 26px; display: grid; gap: 10px; align-content: start; min-width: 0; transition: background 0.3s; }
+.uyari:hover { background: rgba(0,240,255,0.05); }
+.uyari .ust-satir { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.uyari .esik { font: 500 12px/1 var(--f-lcd); color: var(--cam); background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.3); padding: 6px 9px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+.uyari .esik.kritik { color: #FF0055; background: rgba(255,0,85,0.1); border-color: rgba(255,0,85,0.3); box-shadow: 0 0 10px rgba(255,0,85,0.2); }
+.uyari .esik.bilgi { color: var(--amber); background: rgba(255,179,0,0.1); border-color: rgba(255,179,0,0.3); box-shadow: 0 0 10px rgba(255,179,0,0.2); }
+.uyari p { color: var(--sis); font-size: 15px; }
+.uyari-tel { display: grid; gap: 20px; position: sticky; top: 96px; }
+.uyari-dipnot { margin-top: 24px; font-size: 13px; color: var(--sis); max-width: 62ch; border-left: 2px solid rgba(0,240,255,0.3); padding-left: 12px; }
+
+.kilit { background: radial-gradient(120% 70% at 50% 0%, #0D1A33 0%, #030814 45%, #010205 100%); }
+.kilit .saat { text-align: center; font: 600 64px/1 var(--f-baslik); margin-top: 18px; letter-spacing: .02em; color: var(--buz); text-shadow: 0 0 15px rgba(255,255,255,0.3); }
+.kilit .tarih { text-align: center; font-size: 12px; color: var(--cam); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.1em; }
+.bildirim { display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px; margin: 0 10px 8px; padding: 10px 12px; border-radius: 16px; background: rgba(13, 26, 51, 0.7); border: 1px solid rgba(0,240,255,0.15); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.bildirim img { grid-row: span 3; width: 26px; height: 26px; border-radius: 7px; background: #010205; padding: 3px; object-fit: contain; border: 1px solid rgba(0,240,255,0.3); }
+.bildirim .kim { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .08em; color: var(--sis); text-transform: uppercase; }
+.bildirim strong { font-size: 12px; font-weight: 600; color: var(--buz); }
+.bildirim p { font-size: 10.5px; color: #A0B2C9; }
+.bildirim.kritik { background: rgba(64, 0, 21, 0.7); border-color: rgba(255, 0, 85, 0.4); box-shadow: 0 4px 15px rgba(255,0,85,0.15); }
+.bildirim.kritik strong { color: #FF4D85; text-shadow: 0 0 8px rgba(255,0,85,0.4); }
+
+.adimlar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; counter-reset: adim; }
+.adim { position: relative; padding: 32px 28px 30px; border: 1px solid rgba(0,240,255,0.2); border-radius: 18px; background: linear-gradient(180deg, rgba(0,240,255,0.05), transparent); display: grid; gap: 12px; align-content: start; box-shadow: inset 0 0 20px rgba(0,240,255,0.02); }
+.adim::before { counter-increment: adim; content: "0" counter(adim); font: 700 54px/1 var(--f-baslik); color: transparent; -webkit-text-stroke: 1px var(--cam); opacity: 0.7; }
+.adim h3 { color: var(--buz); text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+.adim p { color: var(--sis); font-size: 15px; }
+
+.video-bant { margin-top: 36px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 28px; border-radius: 16px; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3); }
+.video-bant p { color: var(--buz); font-weight: 600; font-size: 18px; }
+.video-bant p span { display: block; color: var(--sis); font-weight: 400; font-size: 14px; margin-top: 4px; }
+
+.alanlar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(0,240,255,0.2); }
+.alan { padding: 32px 32px 12px 0; display: grid; gap: 12px; }
+.alan + .alan { padding-left: 32px; border-left: 1px solid rgba(0,240,255,0.2); }
+.alan h3 { color: var(--buz); }
+.alan p { color: var(--sis); font-size: 15px; }
+
+.sss { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(28px, 5vw, 72px); align-items: start; }
+.sss-liste { border-top: 1px solid rgba(0,240,255,0.2); }
+.sss details { border-bottom: 1px solid rgba(0,240,255,0.2); }
+.sss summary { list-style: none; cursor: pointer; padding: 24px 44px 24px 0; position: relative; font: 600 19px/1.3 var(--f-baslik); letter-spacing: .01em; color: var(--buz); transition: color 0.2s; }
+.sss summary:hover { color: var(--cam); text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+.sss summary::-webkit-details-marker { display: none; }
+.sss summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 12px; height: 12px; margin-top: -9px; border-right: 2px solid var(--cam); border-bottom: 2px solid var(--cam); transform: rotate(45deg); transition: transform .3s ease, box-shadow 0.3s; }
+.sss details[open] summary::after { transform: rotate(-135deg); margin-top: -3px; box-shadow: 2px 2px 5px rgba(0,240,255,0.5); }
+.sss details p { padding: 0 44px 24px 0; color: var(--sis); font-size: 15.5px; max-width: 64ch; }
+
+.teklif { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(32px, 5vw, 72px); align-items: start; }
+.iletisim { display: grid; gap: 24px; margin-top: 36px; }
+.iletisim-satir { display: grid; gap: 6px; }
+.iletisim-satir .etk { font: 600 12px/1 var(--f-baslik); letter-spacing: .2em; text-transform: uppercase; color: var(--cam); text-shadow: 0 0 5px rgba(0,240,255,0.4); }
+.iletisim-satir .deger { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 17px; user-select: all; color: var(--buz); }
+.kopyala { font: 600 11px/1 var(--f-govde); color: var(--gece); background: var(--cam); border: 1px solid transparent; border-radius: 6px; padding: 6px 10px; cursor: pointer; user-select: none; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 0 10px rgba(0,240,255,0.3); }
+.kopyala:hover { background: #33F3FF; box-shadow: var(--cam-parlama); }
+
+form.kart { background: rgba(7, 16, 34, 0.6); border: 1px solid rgba(0,240,255,0.2); border-radius: 20px; padding: clamp(24px, 4vw, 40px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,240,255,0.05); }
+.alan-giris { display: grid; gap: 8px; min-width: 0; }
+.alan-giris.tam { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 600; color: var(--sis); letter-spacing: 0.05em; text-transform: uppercase; }
+
+input, select, textarea {
+  color-scheme: dark;
+  width: 100%; font: 400 16px/1.4 var(--f-govde); color: var(--buz);
+  background: rgba(2, 5, 14, 0.8); border: 1px solid rgba(0,240,255,0.2); border-radius: 10px; padding: 14px 16px;
+  transition: all 0.3s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cam); box-shadow: 0 0 15px rgba(0,240,255,0.2) inset, 0 0 10px rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
+
+select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300F0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+option { background: var(--gece); color: var(--buz); }
+
+textarea { resize: vertical; min-height: 120px; }
+.form-alt { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between; margin-top: 8px; }
+.form-alt small { color: var(--sis); font-size: 12.5px; max-width: 40ch; }
+.durum { grid-column: 1 / -1; font-size: 14px; padding: 14px 16px; border-radius: 10px; background: rgba(0,240,255,0.1); color: var(--cam); border: 1px solid rgba(0,240,255,0.3); text-align: center; font-weight: 500; }
+
+footer { border-top: 1px solid rgba(0,240,255,0.2); padding-block: 56px 40px; background: rgba(2, 5, 14, 0.9); }
+footer .kap { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 40px; }
+footer .kolleksan { height: 38px; width: auto; opacity: 1; filter: drop-shadow(0 0 10px rgba(0,240,255,0.2)); margin-bottom: 16px; }
+footer p, footer a { color: var(--sis); font-size: 14px; }
+footer a { text-decoration: none; display: block; margin-bottom: 10px; transition: color 0.2s, text-shadow 0.2s; }
+footer a:hover { color: var(--cam); text-shadow: 0 0 8px rgba(0,240,255,0.5); }
+footer h4 { font: 600 13px/1 var(--f-baslik); letter-spacing: .2em; text-transform: uppercase; color: var(--buz); margin: 0 0 20px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+.telif { grid-column: 1 / -1; padding-top: 26px; border-top: 1px solid rgba(0,240,255,0.1); font-size: 13px; color: var(--sis); text-align: center; }
+
+html[dir="rtl"] .ust nav { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .sss summary { padding: 24px 0 24px 44px; }
+html[dir="rtl"] .sss summary::after { right: auto; left: 6px; transform: rotate(-45deg); border-right: none; border-left: 2px solid var(--cam); }
+html[dir="rtl"] .sss details[open] summary::after { transform: rotate(45deg); box-shadow: -2px 2px 5px rgba(0,240,255,0.5); }
+html[dir="rtl"] .sss details p { padding: 0 0 24px 44px; }
+html[dir="rtl"] .alan + .alan { border-left: none; border-right: 1px solid rgba(0,240,255,0.2); padding-left: 0; padding-right: 32px; }
+html[dir="rtl"] .btn .iki-satir { text-align: right; }
+html[dir="rtl"] select { background-position: left 16px center; padding-right: 16px; padding-left: 40px; }
+html[dir="rtl"] .lang-sec { background-position: left 10px center; padding-right: 12px; padding-left: 32px; }
+
+@media (max-width: 960px) {
+  .ust nav { display: none; }
+  .ust .btn { margin-left: auto; }
+  .hero .kap, .ceb, .sss, .teklif, .uyari-duzen { grid-template-columns: minmax(0, 1fr); }
+  .uyari-tel { position: static; }
+  .ceb .tel { order: -1; margin-bottom: 30px; }
+  .adimlar { grid-template-columns: minmax(0, 1fr); }
+  .alanlar { grid-template-columns: minmax(0, 1fr); }
+  .alan, .alan + .alan { padding: 24px 0; border-left: 0; border-right: 0; border-bottom: 1px solid rgba(0,240,255,0.2); }
+  footer .kap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  footer .kap > div:first-child { grid-column: 1 / -1; }
+  html[dir="rtl"] .alan + .alan { border-right: 0; padding-right: 0; }
+}
+@media (max-width: 600px) {
+  .ozellik-liste, .uyari-izgara, form.kart { grid-template-columns: minmax(0, 1fr); }
+  .lcd { font-size: 12px; left: 12px; right: 12px; bottom: 12px; padding: 12px; }
+  .ust .logo img { height: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="kap">
+    <a class="logo" href="#ust" aria-label="Hydra Ctrl ana sayfa">
+      <img src="img/logo.webp" alt="Hydra Ctrl">
+    </a>
+    <nav aria-label="Ana menü">
+      <a href="#ozellikler" data-i18n="nav_feat">Özellikler</a>
+      <a href="#uyarilar" data-i18n="nav_alerts">Uyarılar</a>
+      <a href="#kurulum" data-i18n="nav_setup">Kurulum</a>
+      <a href="gizlilik.html" data-i18n="nav_gizlilik">Gizlilik Politikası</a>
+      <a href="#sss" data-i18n="nav_faq">SSS</a>
+      <select id="lang-switcher" class="lang-sec">
+        <option value="tr">TR</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+        <option value="ar">AR</option>
+      </select>
+    </nav>
+    <a class="btn btn-cam btn-kucuk" href="#teklif" data-i18n="nav_quote">Teklif alın</a>
+  </div>
+</header>
+
+<main id="ust">
+  <section class="hero">
+    <div class="kap">
+      <div>
+        <div class="ust-etiket" data-i18n="hero_badge">Modüler Su Depoları İçin</div>
+        <h1 data-i18n="hero_title"><span>Ölç. İzle.</span><span class="parla">Kontrol et.</span></h1>
+        <p class="giris" data-i18n="hero_desc">Hydra Ctrl, deponuza takılan akıllı bir cihaz ve ona bağlı bir uygulamadır. Su seviyesi, sıcaklık, nem, alev ve hareketi ölçer.Bir sorun olduğunda telefonunuza haber verir.</p>
+        <div class="eylem">
+          <a class="btn btn-cam" href="#teklif" data-i18n="nav_quote">Teklif alın</a>
+          <a class="btn btn-hat" href="https://play.google.com/store/apps/details?id=com.hydractrl.app" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.2v17.6c0 .8.9 1.3 1.6.9l14.6-8.8c.7-.4.7-1.4 0-1.8L6.6 2.3C5.9 1.9 5 2.4 5 3.2z"/></svg>
+            <span class="iki-satir"><small data-i18n="hero_dl">Uygulamayı indirin</small>Google Play</span>
+          </a>
+        </div>
+        <p class="not" data-i18n="hero_ios">iOS sürümü hazırlanıyor.</p>
+      </div>
+      
+      <div class="sahne">
+        <svg viewBox="0 0 480 470" role="img" aria-label="Kesitli su deposu çizimi: kapaktaki ultrasonik sensör su yüzeyini ölçüyor, depo yüzde 74 dolu, sensör kabloyla Hydra Ctrl cihazına bağlı">
+          <defs>
+            <linearGradient id="g-su" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00F0FF"/><stop offset=".35" stop-color="#0080FF"/><stop offset="1" stop-color="#001F4D"/></linearGradient>
+            <linearGradient id="g-govde" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#051024"/><stop offset=".5" stop-color="#0A1A3A"/><stop offset="1" stop-color="#030814"/></linearGradient>
+            <clipPath id="c-ic"><rect x="106" y="110" width="248" height="336" rx="18"/></clipPath>
+          </defs>
+          <ellipse cx="230" cy="462" rx="160" ry="7" fill="#000" opacity=".8"/>
+          <g stroke="#112240" stroke-width="1.5">
+            <line x1="64" y1="110" x2="76" y2="110"/><line x1="68" y1="194" x2="76" y2="194"/><line x1="64" y1="278" x2="76" y2="278"/><line x1="68" y1="362" x2="76" y2="362"/><line x1="64" y1="446" x2="76" y2="446"/>
+          </g>
+          <text x="56" y="114" text-anchor="end" fill="#8FA3C4">100</text><text x="56" y="282" text-anchor="end" fill="#8FA3C4">50</text><text x="56" y="450" text-anchor="end" fill="#8FA3C4">0</text>
+          <rect x="96" y="96" width="268" height="360" rx="28" fill="url(#g-govde)" stroke="#00F0FF" stroke-width="2" stroke-opacity="0.3"/>
+          <g clip-path="url(#c-ic)">
+            <rect x="106" y="110" width="248" height="336" fill="#010308"/>
+            <path class="dalga iki" d="M-240 200 q30 -6 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 V460 H-240 Z" fill="#005E80" opacity=".6"/>
+            <path class="dalga" d="M-240 196 q30 -7 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 V460 H-240 Z" fill="url(#g-su)" opacity=".95"/>
+          </g>
+          <g stroke="#00F0FF" stroke-opacity=".1" stroke-width="1"><line x1="96" y1="170" x2="364" y2="170"/><line x1="96" y1="250" x2="364" y2="250"/><line x1="96" y1="330" x2="364" y2="330"/><line x1="96" y1="410" x2="364" y2="410"/></g>
+          <line x1="96" y1="192" x2="372" y2="192" stroke="#00F0FF" stroke-width="1.5" stroke-dasharray="4 6"/>
+          <text x="380" y="197" style="fill:#00F0FF;font-size:15px;text-shadow:0 0 5px #00F0FF">%74</text>
+          <rect x="180" y="80" width="100" height="18" rx="5" fill="#071022" stroke="#00F0FF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <path d="M248 66 C 300 22, 352 30, 392 72" fill="none" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6"/>
+          <rect x="212" y="58" width="36" height="24" rx="5" fill="#02050E" stroke="#00F0FF" stroke-width="1.5"/>
+          <circle cx="223" cy="70" r="4" fill="#00F0FF"/><circle cx="237" cy="70" r="4" fill="#FF0055"/>
+          <g fill="none" stroke="#00F0FF" stroke-width="2" stroke-linecap="round">
+            <path class="ses" d="M206 112 q24 10 48 0"/><path class="ses" d="M206 112 q24 10 48 0"/><path class="ses" d="M206 112 q24 10 48 0"/>
+          </g>
+          <rect x="384" y="50" width="88" height="66" rx="9" fill="#02050E" stroke="#00F0FF" stroke-width="1.5" stroke-opacity="0.6"/>
+          <rect x="394" y="60" width="50" height="30" rx="3" fill="#071022" stroke="#00F0FF" stroke-opacity=".5"/>
+          <g fill="#00F0FF" opacity=".8"><rect x="398" y="65" width="30" height="3" rx="1"/><rect x="398" y="72" width="38" height="3" rx="1"/><rect x="398" y="79" width="24" height="3" rx="1"/></g>
+          <circle class="led" cx="458" cy="74" r="4" fill="#00FF88" filter="drop-shadow(0 0 5px #00FF88)"/>
+          <text x="394" y="108" style="font-size:9px;letter-spacing:.12em;fill:#8FA3C4">HYDRA CTRL</text>
+        </svg>
+        
+        <div class="lcd" aria-label="Örnek cihaz ölçümleri">
+          <div class="baslik"><span class="canli" data-i18n="lcd_live">Canlı</span><span data-i18n="lcd_tank">Merkez Depo · örnek</span></div>
+          <div class="satir"><span data-i18n="lcd_l1">Su Seviyesi</span><b data-oku="seviye">%74</b></div>
+          <div class="satir"><span data-i18n="lcd_l2">Depodaki Su</span><b data-oku="litre">12.588 L</b></div>
+          <div class="satir"><span data-i18n="lcd_l3">Su Sıcaklığı</span><b data-oku="su">19,2 °C</b></div>
+          <div class="satir"><span data-i18n="lcd_l4">Ortam Sıc. / Nem</span><b data-oku="ortam">22,1 °C · %49</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="ozellikler">
+    <div class="kap ceb">
+      
+      <div class="tel" role="img" aria-label="Hydra Ctrl uygulamasında depo ekranı çizimi">
+        <div class="tel-ekran">
+          <div class="tel-durum"><span>9:41</span><i><b style="height:4px"></b><b style="height:6px"></b><b style="height:8px"></b><b style="height:10px"></b></i></div>
+          <div class="tel-baslik"><span>&larr;</span><span data-i18n="app_title">Örnek Bölge - Merkez Depo</span></div>
+          <div class="tel-govde">
+            <div class="tel-kart tel-seviye">
+              <div><div class="tel-etk" data-i18n="app_lbl_lvl">Seviye</div><div class="yuzde" data-oku="seviye">%74</div></div>
+              <span class="hap">NORMAL</span>
+              <div class="kap-yazi" style="grid-column:1/-1"><span data-oku="litre">12.588 L</span> <span data-i18n="app_cap">/ 17.034 L kapasite</span></div>
+              <div class="silindir"><div class="dolu" id="dolu"></div></div>
+            </div>
+            <div class="tel-izgara">
+              <div class="tel-kart"><div class="tel-etk" data-i18n="app_lbl_t1">Su sıcaklığı</div><div class="deger" data-oku="su">19,2 °C</div></div>
+              <div class="tel-kart"><div class="tel-etk" data-i18n="app_lbl_t2">Depodaki su</div><div class="deger" data-oku="litre">12.588 L</div></div>
+              <div class="tel-kart"><div class="tel-etk" data-i18n="app_lbl_t3">Ortam sıcaklığı</div><div class="deger" data-oku="ortamS">22,1 °C</div></div>
+              <div class="tel-kart"><div class="tel-etk" data-i18n="app_lbl_t4">Nem</div><div class="deger" data-oku="nem">%49</div></div>
+            </div>
+            <div class="tel-kart tel-aktif"><div data-i18n="app_lbl_f">Yangın algılama<b data-i18n="app_val_a">Aktif</b></div><div data-i18n="app_lbl_m">Hareket algılama<b data-i18n="app_val_a">Aktif</b></div></div>
+          </div>
+          <div class="tel-menu"><span class="secili" data-i18n="menu_1">Genel</span><span data-i18n="menu_2">Grafik</span><span data-i18n="menu_3">Ayarlar</span><span data-i18n="menu_4">Bilgiler</span></div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="ust-etiket" data-i18n="feat_badge">Uygulama Mimarisi</div>
+        <h2 style="margin-top:18px" data-i18n="feat_title">Deponuz artık <span class="parla">cebinizde.</span></h2>
+        <p class="soluk" style="margin-top:18px;font-size:18px;max-width:36em" data-i18n="feat_desc">Deponun içinde ne kadar su olduğunu görmek için çatıya ya da mekanik odaya çıkmanız gerekmez. Bütün ölçümler tek ekranda, nerede olursanız olun.</p>
+        <div class="ozellik-liste">
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/><path d="M8.5 14.5a3.5 3.5 0 0 0 3.5 3.5"/></svg></div>
+            <h3 data-i18n="f1_t">Seviye ve litre</h3>
+            <p data-i18n="f1_d">Ultrasonik sensör depodaki su yüksekliğini ölçer; uygulama bunu deponuzun ölçülerine göre yüzdeye ve litreye çevirir.</p>
+          </div>
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg></div>
+            <h3 data-i18n="f2_t">Sıcaklık ve nem</h3>
+            <p data-i18n="f2_d">Su sıcaklığı, ortam sıcaklığı ve bağıl nem ayrı ayrı ölçülür.</p>
+          </div>
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></div>
+            <h3 data-i18n="f3_t">Geçmiş grafikleri</h3>
+            <p data-i18n="f3_d">Seviye ve sıcaklığın zaman içindeki değişimini grafiklerle izleyin, tüketiminizi görün.</p>
+          </div>
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+            <h3 data-i18n="f4_t">Bakım hatırlatması</h3>
+            <p data-i18n="f4_d">Deponun bir sonraki bakımına kaç gün kaldığı ekranda görünür, zamanı gelince hatırlatılır.</p>
+          </div>
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+            <h3 data-i18n="f5_t">Birden fazla depo</h3>
+            <p data-i18n="f5_d">Evinizdeki, iş yerinizdeki ya da sitenizdeki bütün depoları tek hesaptan takip edin.</p>
+          </div>
+          <div class="ozellik">
+            <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l7 4v6c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3 data-i18n="f6_t">Garanti ve destek</h3>
+            <p data-i18n="f6_d">Depo bilgileri, garanti şartları, sık sorulan sorular ve kullanım videoları uygulamanın içinde.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="uyarilar">
+    <div class="kap">
+      <div class="bolum-bas">
+        <div class="ust-etiket" data-i18n="alert_badge">Bildirim Sistemi</div>
+        <h2 data-i18n="alert_title">Bir şey olursa <span class="parla">ilk siz bilin.</span></h2>
+        <p data-i18n="alert_desc">Cihaz ölçümleri sunucuya gönderir; bir eşik aşıldığında uygulama telefonunuza bildirim düşer. Hangi uyarıları alacağınızı uygulamanın Ayarlar bölümünden seçersiniz.</p>
+      </div>
+      <div class="uyari-duzen">
+        <div>
+          <div class="uyari-izgara">
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a1_t">Alev algılandı</h3><span class="esik kritik" data-i18n="a1_e">ANINDA</span></div>
+              <p data-i18n="a1_d">Alev sensörü ateş gördüğü an cihaz sesli alarm verir, uygulama da kritik bildirim gönderir.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a2_t">Hareket algılandı</h3><span class="esik" data-i18n="a2_e">ANINDA</span></div>
+              <p data-i18n="a2_d">Depo çevresinde ya da mekanik odada hareket olduğunda haberiniz olur.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a3_t">Taşma</h3><span class="esik" data-i18n="a3_e">SEVİYE</span></div>
+              <p data-i18n="a3_d">Depo dolmak üzereyken uyarır; flatör arızası gibi durumları erkenden fark edersiniz.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a4_t">Boşalma</h3><span class="esik" data-i18n="a4_e">SEVİYE</span></div>
+              <p data-i18n="a4_d">Su seviyesi düştüğünde bildirir; susuz kalmadan önlem alırsınız.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a5_t">Donma riski</h3><span class="esik bilgi" data-i18n="a5_e">≤ 4 °C</span></div>
+              <p data-i18n="a5_d">Su sıcaklığı 4 °C'ye inince haber verir, 1 °C'nin altında "Su donmak üzere" diye kritik uyarı gönderir.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a6_t">Bakteri riski</h3><span class="esik bilgi" data-i18n="a6_e">&gt; 25 °C · 2 sa</span></div>
+              <p data-i18n="a6_d">Su 2 saatten uzun süre 25 °C'nin üzerinde kalırsa uyarır. Bu aralık Legionella gibi bakterilerin çoğalmasına uygundur.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a7_t">Terleme ve korozyon</h3><span class="esik bilgi" data-i18n="a7_e">ÇİĞ NOKTASI</span></div>
+              <p data-i18n="a7_d">Ortam sıcaklığı ve nemden çiğ noktasını hesaplar. Su bu noktaya kadar soğuksa depo yüzeyi terler; uzun sürerse küf ve korozyon başlar.</p>
+            </div>
+            <div class="uyari">
+              <div class="ust-satir"><h3 data-i18n="a8_t">Bakım zamanı</h3><span class="esik" data-i18n="a8_e">TAKVİM</span></div>
+              <p data-i18n="a8_d">Depo temizliği ve dezenfeksiyon zamanı geldiğinde hatırlatır.</p>
+            </div>
+          </div>
+          <p class="uyari-dipnot" data-i18n="alert_note">Hydra Ctrl bir bilgilendirme sistemidir; hırsız alarmı, yangın söndürme ya da dondan koruma sisteminin yerine geçmez. Bildirimlerin ulaşması internet bağlantısına ve telefon ayarlarına bağlıdır.</p>
+        </div>
+        
+        <div class="uyari-tel">
+          <div class="tel" role="img" aria-label="Kilit ekranında Hydra Ctrl bildirimleri çizimi">
+            <div class="tel-ekran kilit">
+              <div class="tel-durum"><span></span><i><b style="height:4px"></b><b style="height:6px"></b><b style="height:8px"></b><b style="height:10px"></b></i></div>
+              <div class="saat">12:55</div>
+              <div class="tarih" data-i18n="lock_date">7 Ekim Salı</div>
+              
+              <div class="bildirim kritik">
+                <img src="img/h-ikon.webp" alt="">
+                <div class="kim"><span>Hydra Ctrl</span><span data-i18n="n_now">şimdi</span></div>
+                <strong data-i18n="n1_t">Alev algılandı!</strong>
+                <p data-i18n="n1_d">Merkez Depo sensörü alev görüyor. Hemen kontrol edin.</p>
+              </div>
+              <div class="bildirim">
+                <img src="img/h-ikon.webp" alt="">
+                <div class="kim"><span>Hydra Ctrl</span><span data-i18n="n_3m">3 dk</span></div>
+                <strong data-i18n="n2_t">Depo taşma uyarısı</strong>
+                <p data-i18n="n2_d">Merkez Depo %97 seviyesine ulaştı.</p>
+              </div>
+              <div class="bildirim">
+                <img src="img/h-ikon.webp" alt="">
+                <div class="kim"><span>Hydra Ctrl</span><span data-i18n="n_15m">15 dk</span></div>
+                <strong data-i18n="n3_t">Hareket algılandı</strong>
+                <p data-i18n="n3_d">Merkez Depo çevresinde hareket var.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="kurulum">
+    <div class="kap">
+      <div class="bolum-bas">
+        <div class="ust-etiket" data-i18n="setup_badge">Nasıl Çalışır?</div>
+        <h2 data-i18n="setup_title">Üç adımda <span class="parla">kurulum.</span></h2>
+        <p data-i18n="setup_desc">Cihazın deponuza fiziksel entegrasyonundan sonra, ağı akıllı telefonunuzla saniyeler içinde kurarsınız.</p>
+      </div>
+      <div class="adimlar">
+        <div class="adim">
+          <h3 data-i18n="s1_t">Fiziksel Montaj</h3>
+          <p data-i18n="s1_d">Seviye sensörü depo kapağına, cihaz depo yanına monte edilir. Kullanıcı adınız ve şifreniz size teslim edilir.</p>
+        </div>
+        <div class="adim">
+          <h3 data-i18n="s2_t">Bluetooth/Wi-Fi Eşleşmesi</h3>
+          <p data-i18n="s2_d">Mobil uygulamayı açın, cihazı Bluetooth ile bulun ve evinizin ya da iş yerinizin WiFi ağını seçin.Cihaz 2,4 GHz ağlara bağlanır.</p>
+        </div>
+        <div class="adim">
+          <h3 data-i18n="s3_t">QR Aktivasyonu</h3>
+          <p data-i18n="s3_d">Depo etiketindeki QR kodu "Depolarım" ekranından okutun. Depo hesabınıza eklenir, ölçümler akmaya başlar.</p>
+        </div>
+      </div>
+      
+      <div class="video-bant">
+        <p><span data-i18n="setup_vid_t" style="display:inline; color:inherit; font-size:inherit; font-weight:inherit;">Kurulumu adım adım izleyin</span><br><span data-i18n="setup_vid_d">Kullanım ve kurulum videoları YouTube'da.</span></p>
+        <a class="btn btn-hat btn-kucuk" href="https://www.youtube.com/playlist?list=PLDFw1KrT73WI" rel="noopener" data-i18n="setup_vid_b">Videoları aç</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="kimler-icin">
+    <div class="kap">
+      <div class="bolum-bas">
+        <div class="ust-etiket" data-i18n="target_badge">Kimler için</div>
+        <h2 data-i18n="target_title">Deponun olduğu <span class="parla">her yer.</span></h2>
+      </div>
+      <div class="alanlar">
+        <div class="alan">
+          <h3 data-i18n="t1_t">Müstakil ev ve yazlık</h3>
+          <p data-i18n="t1_d">Uzaktaki evinizin deposunda su kaldı mı, kışın donma riski var mı, gitmeden görün.</p>
+        </div>
+        <div class="alan">
+          <h3 data-i18n="t2_t">Apartman ve site</h3>
+          <p data-i18n="t2_d">Yönetici ya da görevli, mekanik odadaki depoların durumunu telefonundan izler; taşma ve arızayı erken fark eder.</p>
+        </div>
+        <div class="alan">
+          <h3 data-i18n="t3_t">İşletme ve tesis</h3>
+          <p data-i18n="t3_d">Birden fazla depoyu tek hesapta toplayın; alev ve yetkisiz giriş uyarılarıyla mekanik odanızı koruma altına alın.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="sss">
+    <div class="kap sss">
+      <div class="bolum-bas" style="margin-bottom:0">
+        <div class="ust-etiket" data-i18n="faq_badge">SSS</div>
+        <h2 data-i18n="faq_title">Sık sorulan <span class="parla">sorular.</span></h2>
+        <p data-i18n="faq_desc">Aradığınızı bulamazsanız bize yazın, yardımcı olalım.</p>
+      </div>
+      <div class="sss-liste">
+        <details>
+          <summary data-i18n="q1">Hydra Ctrl'ü kullanmak için ne gerekiyor?</summary>
+          <p data-i18n="a1">Deponuza takılı bir Hydra Ctrl cihazı, cihazın bağlanacağı 2,4 GHz bir WiFi ağı ve sistem üzerinden sizin için açılan müşteri hesabı. Uygulama ücretsizdir.</p>
+        </details>
+        <details>
+          <summary data-i18n="q2">Mevcut depoma takılabilir mi?</summary>
+          <p data-i18n="a2">Hydra Ctrl tüm modüler su depolarına uyum sağlayacak şekilde geliştirildi. Deponuzun donanımına uygunluğunu netleştirmek için teklif formundan bize ulaşın.</p>
+        </details>
+        <details>
+          <summary data-i18n="q3">Modemimi ya da WiFi şifremi değiştirdim, ne yapmalıyım?</summary>
+          <p data-i18n="a3">Uygulamada Ayarlar &gt; Cihaz &gt; WiFi bağlantısı ekranından yeni ağı tanıtın. Cihaz ekranında "WiFi kurulum modu" yazmıyorsa cihazdaki kurulum tuşuna 5 saniye basılı tutun.</p>
+        </details>
+        <details>
+          <summary data-i18n="q4">"Su sıcaklığı yüksek" uyarısı suda bakteri var demek mi?</summary>
+          <p data-i18n="a4">Hayır. Sistem suyun sıcaklığını ölçer, bakteri ölçmez. Uyarı, suyun bakterilerin çoğalmasına uygun sıcaklıkta uzun süre kaldığını söyler. Deponun gölgelenmesi ve düzenli temizlenmesi önerilir; suyun içilebilirliği ancak laboratuvar analiziyle belirlenir.</p>
+        </details>
+        <details>
+          <summary data-i18n="q5">Alev alarmı çaldı, ne yapmalıyım?</summary>
+          <p data-i18n="a5">Önce güvenliğinizi sağlayın ve depo çevresini kontrol edin; gerçek bir yangın varsa hemen 112'yi arayın. Cihazın sesini kurulum tuşuna kısaca basarak susturabilirsiniz; alev sürdükçe uygulamadaki uyarı devam eder.</p>
+        </details>
+        <details>
+          <summary data-i18n="q6">Birden fazla depomu aynı hesaptan izleyebilir miyim?</summary>
+          <p data-i18n="a6">Evet. Her deponun etiketindeki QR kodu "Depolarım" ekranından okutarak hesabınıza ekleyebilirsiniz.</p>
+        </details>
+        <details>
+          <summary data-i18n="q7">Elektrik ya da internet kesilirse ne olur?</summary>
+          <p data-i18n="a7">Cihaz ölçüm gönderemez ve uygulamadaki değerler güncellenmez. Bağlantı geri geldiğinde cihaz kendiliğinden yeniden bağlanır ve ölçüm göndermeye devam eder.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="teklif">
+    <div class="kap teklif">
+      <div>
+        <div class="ust-etiket" data-i18n="quote_badge">Teklif ve iletişim</div>
+        <h2 style="margin-top:18px" data-i18n="quote_title">Deponuzu <span class="parla">akıllı hale getirin.</span></h2>
+        <p class="soluk" style="margin-top:18px;font-size:18px" data-i18n="quote_desc">Depo sayınızı ve nerede kullanacağınızı yazın, size uygun teklifle dönelim.</p>
+        <div class="iletisim">
+          <div class="iletisim-satir">
+            <span class="etk" data-i18n="c_email">E-posta</span>
+            <span class="deger">info@kolleksan.com <button class="kopyala" type="button" data-kopya="info@kolleksan.com" data-i18n="c_copy">Kopyala</button></span>
+          </div>
+          <div class="iletisim-satir">
+            <span class="etk" data-i18n="c_phone">Telefon</span>
+            <span class="deger">+90 (382) 213 12 53 <button class="kopyala" type="button" data-kopya="+903822131253" data-i18n="c_copy">Kopyala</button></span>
+          </div>
+          <div class="iletisim-satir">
+            <span class="etk" data-i18n="c_address">Adres</span>
+            <span class="deger" style="font-size:15px;user-select:text">Erenler OSB, 29. Sokak No: 1, 68220 Taşpınar / Aksaray</span>
+          </div>
+        </div>
+      </div>
+      <form class="kart" id="teklif-formu" novalidate>
+        <div class="alan-giris">
+          <label for="ad" data-i18n="f_name">Ad soyad</label>
+          <input id="ad" name="ad" autocomplete="name" required value="">
+        </div>
+        <div class="alan-giris">
+          <label for="firma"><span data-i18n="f_firm">Firma / site adı (isteğe bağlı)</span></label>
+          <input id="firma" name="firma" autocomplete="organization">
+        </div>
+        <div class="alan-giris">
+          <label for="telefon" data-i18n="f_phone">Telefon</label>
+          <input id="telefon" name="telefon" type="tel" autocomplete="tel" inputmode="tel" required>
+        </div>
+        <div class="alan-giris">
+          <label for="eposta" data-i18n="f_email">E-posta</label>
+          <input id="eposta" name="eposta" type="email" autocomplete="email">
+        </div>
+        <div class="alan-giris">
+          <label for="kullanim" data-i18n="f_use">Kullanım yeri</label>
+          <select id="kullanim" name="kullanim">
+            <option data-i18n="f_use_1">Müstakil ev / yazlık</option>
+            <option data-i18n="f_use_2">Apartman / site</option>
+            <option data-i18n="f_use_3">İşletme / tesis</option>
+            <option data-i18n="f_use_4">Bayi / satıcı</option>
+          </select>
+        </div>
+        <div class="alan-giris">
+          <label for="adet" data-i18n="f_count">Depo sayısı</label>
+          <input id="adet" name="adet" type="number" min="1" inputmode="numeric" value="1">
+        </div>
+        <div class="alan-giris tam">
+          <label for="mesaj" data-i18n="f_msg">Mesajınız</label>
+          <textarea id="mesaj" name="mesaj"></textarea>
+        </div>
+        <div class="form-alt">
+          <small data-i18n="f_note">Bilgileriniz yalnızca teklif hazırlamak için kullanılır.</small>
+          <button class="btn btn-cam" type="submit" data-i18n="f_btn">Teklif iste</button>
+        </div>
+        <div class="durum" id="form-durum" hidden></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="kap">
+    <div>
+      <img class="kolleksan" src="img/kolleksan.webp" alt="Kolleksan">
+      <p data-i18n="ft_dev">Hydra Ctrl, Kolleksan İnovasyon Mühendislik A.Ş. tarafından geliştirilmiştir.</p>
+    </div>
+    <div>
+      <h4 style="color:var(--cam);">Sistem Menüsü</h4>
+      <a href="#ozellikler" data-i18n="nav_feat">Özellikler</a>
+      <a href="#kurulum" data-i18n="nav_setup">Kurulum</a>
+      <a href="#sss" data-i18n="nav_faq">SSS</a>
+    </div>
+    <div>
+      <h4 data-i18n="ft_corp" style="color:var(--cam);">Yasal & Kurumsal</h4>
+      <a href="https://kolleksan.com" rel="noopener">kolleksan.com</a>
+      <a href="gizlilik.html" data-i18n="ft_priv">Gizlilik Politikası & Veri Koruma</a>
+    </div>
+    <p class="telif" data-i18n="ft_copy">© 2026 Kolleksan İnovasyon Mühendislik A.Ş. Tüm hakları saklıdır.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Clipboard copy
+  document.querySelectorAll('.kopyala').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var metin = b.getAttribute('data-kopya');
+      var bitti = function () { 
+        b.textContent = b.getAttribute('data-i18n') ? (langSwitcher.value === 'tr' ? 'Kopyalandı' : 'Copied') : 'Kopyalandı'; 
+        setTimeout(function () { b.textContent = b.getAttribute('data-i18n') ? (langSwitcher.value === 'tr' ? 'Kopyala' : 'Copy') : 'Kopyala'; }, 1600); 
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(metin).then(bitti, function () { secTut(b); });
+      } else { secTut(b); }
+    });
+  });
+  function secTut(b) {
+    var r = document.createRange(); r.selectNodeContents(b.parentNode.firstChild);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = 'CTRL+C';
+  }
+
+  // LCD/App Simulation Logic
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var kap = 17034, seviye = 74.0, su = 19.2, ortam = 22.1, nem = 49;
+  var yaz = function (k, v) { document.querySelectorAll('[data-oku="' + k + '"]').forEach(function (e) { e.textContent = v; }); };
+  var tr_format = function (n, d) { return n.toFixed(d).replace('.', ','); };
+  function guncelle() {
+    seviye = Math.min(78, Math.max(70, seviye + (Math.random() - .55) * .4));
+    su += (Math.random() - .5) * .1; ortam += (Math.random() - .5) * .1;
+    nem = Math.round(Math.min(52, Math.max(46, nem + (Math.random() - .5) * 1.2)));
+    yaz('seviye', '%' + Math.round(seviye));
+    yaz('litre', Math.round(kap * seviye / 100).toLocaleString('tr-TR') + ' L');
+    yaz('su', tr_format(su, 1) + ' °C');
+    yaz('ortam', tr_format(ortam, 1) + ' °C · %' + nem);
+    yaz('ortamS', tr_format(ortam, 1) + ' °C');
+    yaz('nem', '%' + nem);
+    var d = document.getElementById('dolu'); if (d) d.style.setProperty('--doluluk', seviye + '%');
+  }
+  if (!reduce) setInterval(guncelle, 3000);
+
+  // Form submission prevention
+  var form = document.getElementById('teklif-formu');
+  var durum = document.getElementById('form-durum');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ad = form.ad.value.trim(), tel = form.telefon.value.trim();
+    durum.hidden = false;
+    if (!ad || !tel) {
+      durum.textContent = langSwitcher.value === 'tr' ? 'Ad soyad ve telefon zorunludur.' : 'Name and phone are required.';
+      (ad ? form.telefon : form.ad).focus();
+      return;
+    }
+    durum.textContent = langSwitcher.value === 'tr' ? 'Bu bir önizleme.' : 'Preview.';
+  });
+
+  // Localization Dictionary (Literal Translations without extra technical words)
+  const dict = {
+    tr: {
+      nav_feat: "Özellikler", nav_alerts: "Uyarılar", nav_setup: "Kurulum", nav_gizlilik: "Gizlilik Politikası", nav_faq: "SSS", nav_quote: "Teklif alın",
+      hero_badge: "Modüler Su Depoları İçin", hero_title: "<span>Ölç. İzle.</span><span class='parla'>Kontrol et.</span>",
+      hero_desc: "Hydra Ctrl, deponuza takılan akıllı bir cihaz ve ona bağlı bir uygulamadır. Su seviyesi, sıcaklık, nem, alev ve hareketi ölçer.Bir sorun olduğunda telefonunuza haber verir.",
+      hero_dl: "Uygulamayı indirin", hero_ios: "iOS sürümü hazırlanıyor.",
+      lcd_live: "Canlı", lcd_tank: "Merkez Depo · örnek", lcd_l1: "Su Seviyesi", lcd_l2: "Depodaki Su", lcd_l3: "Su Sıcaklığı", lcd_l4: "Ortam Sıc. / Nem",
+      app_title: "Örnek Bölge - Merkez Depo", app_lbl_lvl: "Seviye", app_cap: "/ 17.034 L kapasite", app_lbl_t1: "Su sıcaklığı", app_lbl_t2: "Depodaki su", app_lbl_t3: "Ortam sıcaklığı", app_lbl_t4: "Nem", app_lbl_f: "Yangın algılama", app_lbl_m: "Hareket algılama", app_val_a: "Aktif",
+      menu_1: "Genel", menu_2: "Grafik", menu_3: "Ayarlar", menu_4: "Bilgiler",
+      feat_badge: "Uygulama Mimarisi", feat_title: "Deponuz artık <span class='parla'>cebinizde.</span>", feat_desc: "Deponun içinde ne kadar su olduğunu görmek için çatıya ya da mekanik odaya çıkmanız gerekmez. Bütün ölçümler tek ekranda, nerede olursanız olun.",
+      f1_t: "Seviye ve litre", f1_d: "Ultrasonik sensör depodaki su yüksekliğini ölçer; uygulama bunu deponuzun ölçülerine göre yüzdeye ve litreye çevirir.",
+      f2_t: "Sıcaklık ve nem", f2_d: "Su sıcaklığı, ortam sıcaklığı ve bağıl nem ayrı ayrı ölçülür.",
+      f3_t: "Geçmiş grafikleri", f3_d: "Seviye ve sıcaklığın zaman içindeki değişimini grafiklerle izleyin, tüketiminizi görün.",
+      f4_t: "Bakım hatırlatması", f4_d: "Deponun bir sonraki bakımına kaç gün kaldığı ekranda görünür, zamanı gelince hatırlatılır.",
+      f5_t: "Birden fazla depo", f5_d: "Evinizdeki, iş yerinizdeki ya da sitenizdeki bütün depoları tek hesaptan takip edin.",
+      f6_t: "Garanti ve destek", f6_d: "Depo bilgileri, garanti şartları, sık sorulan sorular ve kullanım videoları uygulamanın içinde.",
+      alert_badge: "Bildirim Sistemi", alert_title: "Bir şey olursa <span class='parla'>ilk siz bilin.</span>", alert_desc: "Cihaz ölçümleri sunucuya gönderir; bir eşik aşıldığında uygulama telefonunuza bildirim düşer. Hangi uyarıları alacağınızı uygulamanın Ayarlar bölümünden seçersiniz.",
+      a1_t: "Alev algılandı", a1_d: "Alev sensörü ateş gördüğü an cihaz sesli alarm verir, uygulama da kritik bildirim gönderir.", a1_e: "ANINDA",
+      a2_t: "Hareket algılandı", a2_d: "Depo çevresinde ya da mekanik odada hareket olduğunda haberiniz olur.", a2_e: "ANINDA",
+      a3_t: "Taşma", a3_d: "Depo dolmak üzereyken uyarır; flatör arızası gibi durumları erkenden fark edersiniz.", a3_e: "SEVİYE",
+      a4_t: "Boşalma", a4_d: "Su seviyesi düştüğünde bildirir; susuz kalmadan önlem alırsınız.", a4_e: "SEVİYE",
+      a5_t: "Donma riski", a5_d: "Su sıcaklığı 4 °C'ye inince haber verir, 1 °C'nin altında \"Su donmak üzere\" diye kritik uyarı gönderir.", a5_e: "≤ 4 °C",
+      a6_t: "Bakteri riski", a6_d: "Su 2 saatten uzun süre 25 °C'nin üzerinde kalırsa uyarır. Bu aralık Legionella gibi bakterilerin çoğalmasına uygundur.", a6_e: "> 25 °C · 2 sa",
+      a7_t: "Terleme ve korozyon", a7_d: "Ortam sıcaklığı ve nemden çiğ noktasını hesaplar. Su bu noktaya kadar soğuksa depo yüzeyi terler; uzun sürerse küf ve korozyon başlar.", a7_e: "ÇİĞ NOKTASI",
+      a8_t: "Bakım zamanı", a8_d: "Depo temizliği ve dezenfeksiyon zamanı geldiğinde hatırlatır.", a8_e: "TAKVİM",
+      alert_note: "Hydra Ctrl bir bilgilendirme sistemidir; hırsız alarmı, yangın söndürme ya da dondan koruma sisteminin yerine geçmez. Bildirimlerin ulaşması internet bağlantısına ve telefon ayarlarına bağlıdır.",
+      lock_date: "7 Ekim Salı", n_now: "şimdi", n_3m: "3 dk", n_15m: "15 dk",
+      n1_t: "Alev algılandı!", n1_d: "Merkez Depo sensörü alev görüyor. Hemen kontrol edin.",
+      n2_t: "Depo taşma uyarısı", n2_d: "Merkez Depo %97 seviyesine ulaştı.",
+      n3_t: "Hareket algılandı", n3_d: "Merkez Depo çevresinde hareket var.",
+      setup_badge: "Nasıl Çalışır?", setup_title: "Üç adımda <span class='parla'>kurulum.</span>", setup_desc: "Cihazın deponuza fiziksel entegrasyonundan sonra, ağı akıllı telefonunuzla saniyeler içinde kurarsınız.",
+      s1_t: "Fiziksel Montaj", s1_d: "Seviye sensörü depo kapağına, cihaz depo yanına monte edilir. Kullanıcı adınız ve şifreniz size teslim edilir.",
+      s2_t: "Bluetooth/Wi-Fi Eşleşmesi", s2_d: "Mobil uygulamayı açın, cihazı Bluetooth ile bulun ve evinizin ya da iş yerinizin WiFi ağını seçin.Cihaz 2,4 GHz ağlara bağlanır.",
+      s3_t: "QR Aktivasyonu", s3_d: "Depo etiketindeki QR kodu \"Depolarım\" ekranından okutun. Depo hesabınıza eklenir, ölçümler akmaya başlar.",
+      setup_vid_t: "Kurulumu adım adım izleyin", setup_vid_d: "Kullanım ve kurulum videoları YouTube'da.", setup_vid_b: "Videoları aç",
+      target_badge: "Kimler için", target_title: "Deponun olduğu <span class='parla'>her yer.</span>",
+      t1_t: "Müstakil ev ve yazlık", t1_d: "Uzaktaki evinizin deposunda su kaldı mı, kışın donma riski var mı, gitmeden görün.",
+      t2_t: "Apartman ve site", t2_d: "Yönetici ya da görevli, mekanik odadaki depoların durumunu telefonundan izler; taşma ve arızayı erken fark eder.",
+      t3_t: "İşletme ve tesis", t3_d: "Birden fazla depoyu tek hesapta toplayın; alev ve yetkisiz giriş uyarılarıyla mekanik odanızı koruma altına alın.",
+      faq_badge: "SSS", faq_title: "Sık sorulan <span class='parla'>sorular.</span>", faq_desc: "Aradığınızı bulamazsanız bize yazın, yardımcı olalım.",
+      q1: "Hydra Ctrl'ü kullanmak için ne gerekiyor?", a1: "Deponuza takılı bir Hydra Ctrl cihazı, cihazın bağlanacağı 2,4 GHz bir WiFi ağı ve sistem üzerinden sizin için açılan müşteri hesabı. Uygulama ücretsizdir.",
+      q2: "Mevcut depoma takılabilir mi?", a2: "Hydra Ctrl tüm modüler su depolarına uyum sağlayacak şekilde geliştirildi. Deponuzun donanımına uygunluğunu netleştirmek için teklif formundan bize ulaşın.",
+      q3: "Modemimi ya da WiFi şifremi değiştirdim, ne yapmalıyım?", a3: "Uygulamada Ayarlar > Cihaz > WiFi bağlantısı ekranından yeni ağı tanıtın. Cihaz ekranında \"WiFi kurulum modu\" yazmıyorsa cihazdaki kurulum tuşuna 5 saniye basılı tutun.",
+      q4: "\"Su sıcaklığı yüksek\" uyarısı suda bakteri var demek mi?", a4: "Hayır. Sistem suyun sıcaklığını ölçer, bakteri ölçmez. Uyarı, suyun bakterilerin çoğalmasına uygun sıcaklıkta uzun süre kaldığını söyler. Deponun gölgelenmesi ve düzenli temizlenmesi önerilir; suyun içilebilirliği ancak laboratuvar analiziyle belirlenir.",
+      q5: "Alev alarmı çaldı, ne yapmalıyım?", a5: "Önce güvenliğinizi sağlayın ve depo çevresini kontrol edin; gerçek bir yangın varsa hemen 112'yi arayın. Cihazın sesini kurulum tuşuna kısaca basarak susturabilirsiniz; alev sürdükçe uygulamadaki uyarı devam eder.",
+      q6: "Birden fazla depomu aynı hesaptan izleyebilir miyim?", a6: "Evet. Her deponun etiketindeki QR kodu \"Depolarım\" ekranından okutarak hesabınıza ekleyebilirsiniz.",
+      q7: "Elektrik ya da internet kesilirse ne olur?", a7: "Cihaz ölçüm gönderemez ve uygulamadaki değerler güncellenmez. Bağlantı geri geldiğinde cihaz kendiliğinden yeniden bağlanır ve ölçüm göndermeye devam eder.",
+      quote_badge: "Teklif ve iletişim", quote_title: "Deponuzu <span class='parla'>akıllı hale getirin.</span>", quote_desc: "Depo sayınızı ve nerede kullanacağınızı yazın, size uygun teklifle dönelim.",
+      c_email: "E-posta", c_phone: "Telefon", c_address: "Adres", c_copy: "Kopyala",
+      f_name: "Ad soyad", f_firm: "Firma / site adı (isteğe bağlı)", f_phone: "Telefon", f_email: "E-posta", f_use: "Kullanım yeri", f_count: "Depo sayısı", f_msg: "Mesajınız", f_note: "Bilgileriniz yalnızca teklif hazırlamak için kullanılır.", f_btn: "Teklif iste",
+      f_use_1: "Müstakil ev / yazlık", f_use_2: "Apartman / site", f_use_3: "İşletme / tesis", f_use_4: "Bayi / satıcı",
+      ft_dev: "Hydra Ctrl, Kolleksan İnovasyon Mühendislik A.Ş. tarafından geliştirilmiştir.", ft_corp: "Yasal & Kurumsal", ft_priv: "Gizlilik Politikası & Veri Koruma", ft_copy: "© 2026 Kolleksan İnovasyon Mühendislik A.Ş. Tüm hakları saklıdır."
+    },
+    en: {
+      nav_feat: "Features", nav_alerts: "Alerts", nav_setup: "Setup", nav_gizlilik: "Privacy Policy", nav_faq: "FAQ", nav_quote: "Get a quote",
+      hero_badge: "For Modular Water Tanks", hero_title: "<span>Measure. Monitor.</span><span class='parla'>Control.</span>",
+      hero_desc: "Hydra Ctrl is a smart device attached to your tank and an application connected to it. It measures water level, temperature, humidity, flame, and motion. It notifies your phone when there is a problem.",
+      hero_dl: "Download the application", hero_ios: "iOS version is being prepared.",
+      lcd_live: "Live", lcd_tank: "Central Tank · sample", lcd_l1: "Water Level", lcd_l2: "Water in Tank", lcd_l3: "Water Temperature", lcd_l4: "Ambient Temp / Hum",
+      app_title: "Sample Zone - Central Tank", app_lbl_lvl: "Level", app_cap: "/ 17,034 L capacity", app_lbl_t1: "Water temperature", app_lbl_t2: "Water in tank", app_lbl_t3: "Ambient temperature", app_lbl_t4: "Humidity", app_lbl_f: "Fire detection", app_lbl_m: "Motion detection", app_val_a: "Active",
+      menu_1: "General", menu_2: "Chart", menu_3: "Settings", menu_4: "Information",
+      feat_badge: "Application Architecture", feat_title: "Your tank is now in your <span class='parla'>pocket.</span>", feat_desc: "You don't need to go up to the roof or mechanical room to see how much water is left in the tank. All measurements are on a single screen, wherever you are.",
+      f1_t: "Level and liter", f1_d: "The ultrasonic sensor measures the water height in the tank; the application converts this to percentage and liter according to your tank's dimensions.",
+      f2_t: "Temperature and humidity", f2_d: "Water temperature, ambient temperature and relative humidity are measured separately.",
+      f3_t: "History charts", f3_d: "Monitor the change of level and temperature over time with charts, see your consumption.",
+      f4_t: "Maintenance reminder", f4_d: "How many days left until the next maintenance of the tank appears on the screen, reminded when the time comes.",
+      f5_t: "Multiple tanks", f5_d: "Track all tanks in your home, workplace, or complex from a single account.",
+      f6_t: "Warranty and support", f6_d: "Tank information, warranty terms, frequently asked questions, and usage videos are inside the app.",
+      alert_badge: "Notification System", alert_title: "If something happens, <span class='parla'>be the first to know.</span>", alert_desc: "The device sends measurements to the server; when a threshold is exceeded, a notification drops to your phone. You select which alerts you will receive from the Settings section of the application.",
+      a1_t: "Flame detected", a1_d: "The moment the flame sensor sees fire, the device gives an audible alarm, and the application sends a critical notification.", a1_e: "INSTANT",
+      a2_t: "Motion detected", a2_d: "You are notified when there is movement around the tank or in the mechanical room.", a2_e: "INSTANT",
+      a3_t: "Overflow", a3_d: "Warns when the tank is about to fill; you notice situations like float valve failure early.", a3_e: "LEVEL",
+      a4_t: "Emptying", a4_d: "Notifies when the water level drops; you take precautions before running out of water.", a4_e: "LEVEL",
+      a5_t: "Freezing risk", a5_d: "Notifies when the water temperature drops to 4 °C, sends a critical alert \"Water is about to freeze\" below 1 °C.", a5_e: "≤ 4 °C",
+      a6_t: "Bacteria risk", a6_d: "Warns if water stays above 25 °C for more than 2 hours. This range is suitable for bacteria like Legionella to multiply.", a6_e: "> 25 °C · 2 hr",
+      a7_t: "Sweating and corrosion", a7_d: "Calculates the dew point from ambient temperature and humidity. If the water is cold up to this point, the tank surface sweats; if it lasts long, mold and corrosion begin.", a7_e: "DEW POINT",
+      a8_t: "Maintenance time", a8_d: "Reminds when it is time for tank cleaning and disinfection.", a8_e: "CALENDAR",
+      alert_note: "Hydra Ctrl is an information system; it does not replace a burglar alarm, fire extinguishing, or frost protection system. The delivery of notifications depends on internet connection and phone settings.",
+      lock_date: "October 7 Tuesday", n_now: "now", n_3m: "3 min", n_15m: "15 min",
+      n1_t: "Flame detected!", n1_d: "Central Tank sensor sees flame. Check immediately.",
+      n2_t: "Tank overflow warning", n2_d: "Central Tank reached 97% level.",
+      n3_t: "Motion detected", n3_d: "There is movement around the Central Tank.",
+      setup_badge: "How It Works?", setup_title: "Setup in <span class='parla'>three steps.</span>", setup_desc: "After the physical integration of the device into your tank, you set up the network with your smartphone in seconds.",
+      s1_t: "Physical Installation", s1_d: "The level sensor is mounted on the tank cover, the device next to the tank. Your username and password are delivered to you.",
+      s2_t: "Bluetooth/Wi-Fi Pairing", s2_d: "Open the mobile app, find the device via Bluetooth and select your home or workplace WiFi network. The device connects to 2.4 GHz networks.",
+      s3_t: "QR Activation", s3_d: "Scan the QR code on the tank label from the \"My Tanks\" screen. The tank is added to your account, measurements start flowing.",
+      setup_vid_t: "Watch the setup step by step", setup_vid_d: "Usage and setup videos are on YouTube.", setup_vid_b: "Open videos",
+      target_badge: "For whom", target_title: "Everywhere <span class='parla'>there is a tank.</span>",
+      t1_t: "Detached house and summer house", t1_d: "See if there is water left in your remote home's tank and if there is a freezing risk in winter before you go.",
+      t2_t: "Apartment and complex", t2_d: "The manager or staff monitors the status of the tanks in the mechanical room from their phone; notices overflows and malfunctions early.",
+      t3_t: "Business and facility", t3_d: "Gather multiple tanks in a single account; protect your mechanical room with flame and unauthorized entry alerts.",
+      faq_badge: "FAQ", faq_title: "Frequently asked <span class='parla'>questions.</span>", faq_desc: "If you cannot find what you are looking for, write to us, let us help.",
+      q1: "What is required to use Hydra Ctrl?", a1: "A Hydra Ctrl device attached to your tank, a 2.4 GHz WiFi network for the device to connect to, and a customer account opened for you through the system. The application is free.",
+      q2: "Can it be installed on my existing tank?", a2: "Hydra Ctrl is developed to adapt to all modular water tanks. Contact us from the quote form to clarify its suitability for your tank's hardware.",
+      q3: "I changed my modem or WiFi password, what should I do?", a3: "Introduce the new network from the Settings > Device > WiFi connection screen in the application. If it does not say \"WiFi setup mode\" on the device screen, press and hold the setup button on the device for 5 seconds.",
+      q4: "Does the \"Water temperature high\" warning mean there are bacteria in the water?", a4: "No. The system measures the temperature of the water, not bacteria. The warning says that the water has remained at a temperature suitable for bacteria to multiply for a long time. Shading and regular cleaning of the tank are recommended; the drinkability of the water is determined only by laboratory analysis.",
+      q5: "The flame alarm rang, what should I do?", a5: "First ensure your safety and check the area around the tank; if there is a real fire, call 112 immediately. You can silence the device's voice by briefly pressing the setup button; as long as the flame continues, the warning in the application continues.",
+      q6: "Can I monitor more than one of my tanks from the same account?", a6: "Yes. You can add each tank to your account by scanning the QR code on its label from the \"My Tanks\" screen.",
+      q7: "What happens if the electricity or internet is cut?", a7: "The device cannot send measurements and the values in the application are not updated. When the connection comes back, the device automatically reconnects and continues to send measurements.",
+      quote_badge: "Quote and contact", quote_title: "Make your tank <span class='parla'>smart.</span>", quote_desc: "Write your tank count and where you will use it, and we will return with a suitable quote.",
+      c_email: "Email", c_phone: "Phone", c_address: "Address", c_copy: "Copy",
+      f_name: "Name surname", f_firm: "Company / site name (optional)", f_phone: "Phone", f_email: "E-mail", f_use: "Usage place", f_count: "Tank count", f_msg: "Your message", f_note: "Your information is only used to prepare a quote.", f_btn: "Request a quote",
+      f_use_1: "Detached house / summer house", f_use_2: "Apartment / complex", f_use_3: "Business / facility", f_use_4: "Dealer / seller",
+      ft_dev: "Hydra Ctrl was developed by Kolleksan Innovation Engineering Inc.", ft_corp: "Legal & Corporate", ft_priv: "Privacy Policy & Data Protection", ft_copy: "© 2026 Kolleksan Innovation Engineering Inc. All rights reserved."
+    },
+    fr: {
+      nav_feat: "Caractéristiques", nav_alerts: "Avertissements", nav_setup: "Installation", nav_gizlilik: "Politique de confidentialité", nav_faq: "FAQ", nav_quote: "Obtenir un devis",
+      hero_badge: "Pour les Réservoirs d'Eau Modulaires", hero_title: "<span>Mesurez. Surveillez.</span><span class='parla'>Contrôlez.</span>",
+      hero_desc: "Hydra Ctrl est un appareil intelligent fixé à votre réservoir et une application qui y est connectée. Il mesure le niveau d'eau, la température, l'humidité, la flamme et le mouvement. Il avertit votre téléphone en cas de problème.",
+      hero_dl: "Téléchargez l'application", hero_ios: "La version iOS est en préparation.",
+      lcd_live: "En direct", lcd_tank: "Réservoir Central · exemple", lcd_l1: "Niveau d'Eau", lcd_l2: "Eau dans le Réservoir", lcd_l3: "Temp. de l'Eau", lcd_l4: "Temp. Amb. / Hum",
+      app_title: "Zone d'exemple - Rés. Central", app_lbl_lvl: "Niveau", app_cap: "/ 17.034 L capacité", app_lbl_t1: "Temp. de l'eau", app_lbl_t2: "Eau dans le rés.", app_lbl_t3: "Temp. ambiante", app_lbl_t4: "Humidité", app_lbl_f: "Détection incendie", app_lbl_m: "Détection mvt.", app_val_a: "Actif",
+      menu_1: "Général", menu_2: "Graphique", menu_3: "Paramètres", menu_4: "Informations",
+      feat_badge: "Architecture de l'Application", feat_title: "Votre réservoir est maintenant <span class='parla'>dans votre poche.</span>", feat_desc: "Il n'est pas nécessaire de monter sur le toit ou dans le local technique pour voir combien d'eau il reste dans le réservoir. Toutes les mesures sont sur un seul écran, où que vous soyez.",
+      f1_t: "Niveau et litre", f1_d: "Le capteur à ultrasons mesure la hauteur de l'eau dans le réservoir ; l'application convertit cela en pourcentage et en litre selon les dimensions de votre réservoir.",
+      f2_t: "Température et humidité", f2_d: "La température de l'eau, la température ambiante et l'humidité relative sont mesurées séparément.",
+      f3_t: "Graphiques historiques", f3_d: "Surveillez l'évolution du niveau et de la température au fil du temps avec des graphiques, voyez votre consommation.",
+      f4_t: "Rappel d'entretien", f4_d: "Le nombre de jours restants avant le prochain entretien du réservoir s'affiche à l'écran, un rappel est envoyé le moment venu.",
+      f5_t: "Plusieurs réservoirs", f5_d: "Suivez tous les réservoirs de votre maison, de votre lieu de travail ou de votre résidence à partir d'un seul compte.",
+      f6_t: "Garantie et support", f6_d: "Les informations sur le réservoir, les conditions de garantie, les questions fréquemment posées et les vidéos d'utilisation sont dans l'application.",
+      alert_badge: "Système de Notification", alert_title: "S'il se passe quelque chose, <span class='parla'>soyez le premier informé.</span>", alert_desc: "L'appareil envoie les mesures au serveur ; lorsqu'un seuil est dépassé, l'application envoie une notification sur votre téléphone. Vous choisissez les alertes que vous recevrez dans la section Paramètres de l'application.",
+      a1_t: "Flamme détectée", a1_d: "Dès que le capteur de flamme voit du feu, l'appareil émet une alarme sonore, et l'application envoie une notification critique.", a1_e: "IMMÉDIAT",
+      a2_t: "Mouvement détecté", a2_d: "Vous êtes averti lorsqu'il y a un mouvement autour du réservoir ou dans le local technique.", a2_e: "IMMÉDIAT",
+      a3_t: "Débordement", a3_d: "Avertit lorsque le réservoir est sur le point de se remplir ; vous remarquez tôt les situations comme une panne de flotteur.", a3_e: "NIVEAU",
+      a4_t: "Vidage", a4_d: "Notifie lorsque le niveau d'eau baisse ; vous prenez des précautions avant de manquer d'eau.", a4_e: "NIVEAU",
+      a5_t: "Risque de gel", a5_d: "Avertit lorsque la température de l'eau chute à 4 °C, envoie une alerte critique \"L'eau est sur le point de geler\" en dessous de 1 °C.", a5_e: "≤ 4 °C",
+      a6_t: "Risque bactérien", a6_d: "Avertit si l'eau reste au-dessus de 25 °C pendant plus de 2 heures. Cette plage est propice à la multiplication de bactéries comme la Légionelle.", a6_e: "> 25 °C · 2 h",
+      a7_t: "Transpiration et corrosion", a7_d: "Calcule le point de rosée à partir de la température ambiante et de l'humidité. Si l'eau est froide à ce point, la surface du réservoir transpire ; si cela dure longtemps, la moisissure et la corrosion commencent.", a7_e: "POINT DE ROSÉE",
+      a8_t: "Temps d'entretien", a8_d: "Rappelle quand il est temps de nettoyer et de désinfecter le réservoir.", a8_e: "CALENDRIER",
+      alert_note: "Hydra Ctrl est un système d'information ; il ne remplace pas un système d'alarme antivol, d'extinction d'incendie ou de protection contre le gel. La réception des notifications dépend de la connexion internet et des paramètres du téléphone.",
+      lock_date: "Mardi 7 Octobre", n_now: "maintenant", n_3m: "3 min", n_15m: "15 min",
+      n1_t: "Flamme détectée !", n1_d: "Le capteur du Réservoir Central voit une flamme. Vérifiez immédiatement.",
+      n2_t: "Avertissement de débordement", n2_d: "Le Réservoir Central a atteint le niveau de 97%.",
+      n3_t: "Mouvement détecté", n3_d: "Il y a du mouvement autour du Réservoir Central.",
+      setup_badge: "Comment ça marche ?", setup_title: "Installation en <span class='parla'>trois étapes.</span>", setup_desc: "Après l'intégration physique de l'appareil à votre réservoir, vous configurez le réseau avec votre smartphone en quelques secondes.",
+      s1_t: "Installation Physique", s1_d: "Le capteur de niveau est monté sur le couvercle du réservoir, l'appareil à côté. Votre nom d'utilisateur et mot de passe vous sont fournis.",
+      s2_t: "Appairage Bluetooth/Wi-Fi", s2_d: "Ouvrez l'application mobile, trouvez l'appareil via Bluetooth et sélectionnez votre réseau WiFi. L'appareil se connecte aux réseaux 2,4 GHz.",
+      s3_t: "Activation QR", s3_d: "Scannez le code QR sur l'étiquette du réservoir depuis l'écran \"Mes Réservoirs\". Le réservoir est ajouté à votre compte, les mesures commencent à affluer.",
+      setup_vid_t: "Suivez l'installation étape par étape", setup_vid_d: "Des vidéos d'utilisation et d'installation sont sur YouTube.", setup_vid_b: "Ouvrir les vidéos",
+      target_badge: "Pour qui", target_title: "Partout où <span class='parla'>il y a un réservoir.</span>",
+      t1_t: "Maison individuelle et maison d'été", t1_d: "Vérifiez s'il reste de l'eau et s'il y a un risque de gel en hiver dans votre maison éloignée avant d'y aller.",
+      t2_t: "Appartement et résidence", t2_d: "Le gestionnaire ou le personnel surveille l'état des réservoirs depuis son téléphone ; détecte les débordements et les pannes tôt.",
+      t3_t: "Entreprise et installation", t3_d: "Rassemblez plusieurs réservoirs sur un seul compte ; protégez votre local technique avec des alertes de flamme et d'intrusion.",
+      faq_badge: "FAQ", faq_title: "Questions <span class='parla'>fréquentes.</span>", faq_desc: "Si vous ne trouvez pas ce que vous cherchez, écrivez-nous, laissez-nous vous aider.",
+      q1: "Que faut-il pour utiliser Hydra Ctrl ?", a1: "Un appareil Hydra Ctrl attaché à votre réservoir, un réseau WiFi 2,4 GHz auquel l'appareil peut se connecter et un compte client ouvert pour vous via le système. L'application est gratuite.",
+      q2: "Peut-il être installé sur mon réservoir existant ?", a2: "Hydra Ctrl a été développé pour s'adapter à tous les réservoirs d'eau modulaires. Contactez-nous à partir du formulaire de devis pour vérifier son adéquation avec votre matériel.",
+      q3: "J'ai changé mon modem ou mon mot de passe WiFi, que dois-je faire ?", a3: "Introduisez le nouveau réseau depuis l'écran Paramètres > Appareil > Connexion WiFi dans l'application. S'il n'est pas indiqué \"Mode de configuration WiFi\" sur l'écran de l'appareil, maintenez le bouton de configuration de l'appareil enfoncé pendant 5 secondes.",
+      q4: "L'avertissement \"Température de l'eau élevée\" signifie-t-il qu'il y a des bactéries dans l'eau ?", a4: "Non. Le système mesure la température de l'eau, pas les bactéries. L'avertissement indique que l'eau est restée longtemps à une température propice à la multiplication des bactéries. L'ombrage et le nettoyage régulier du réservoir sont recommandés ; la potabilité de l'eau n'est déterminée que par une analyse en laboratoire.",
+      q5: "L'alarme de flamme a sonné, que dois-je faire ?", a5: "Assurez d'abord votre sécurité et vérifiez la zone autour du réservoir ; s'il y a un vrai incendie, appelez le 112 immédiatement. Vous pouvez couper le son de l'appareil en appuyant brièvement sur le bouton de configuration ; tant que la flamme continue, l'avertissement dans l'application continue.",
+      q6: "Puis-je surveiller plusieurs de mes réservoirs à partir du même compte ?", a6: "Oui. Vous pouvez ajouter chaque réservoir à votre compte en scannant le code QR sur son étiquette depuis l'écran \"Mes Réservoirs\".",
+      q7: "Que se passe-t-il si l'électricité ou internet est coupé ?", a7: "L'appareil ne peut pas envoyer de mesures et les valeurs de l'application ne sont pas mises à jour. Lorsque la connexion revient, l'appareil se reconnecte automatiquement et continue d'envoyer des mesures.",
+      quote_badge: "Devis et contact", quote_title: "Rendez votre réservoir <span class='parla'>intelligent.</span>", quote_desc: "Écrivez le nombre de vos réservoirs et où vous l'utiliserez, nous vous répondrons avec un devis adapté.",
+      c_email: "E-mail", c_phone: "Téléphone", c_address: "Adresse", c_copy: "Copier",
+      f_name: "Nom prénom", f_firm: "Nom de l'entreprise / site (facultatif)", f_phone: "Téléphone", f_email: "E-mail", f_use: "Lieu d'utilisation", f_count: "Nombre de réservoirs", f_msg: "Votre message", f_note: "Vos informations sont utilisées uniquement pour préparer un devis.", f_btn: "Demander un devis",
+      f_use_1: "Maison individuelle / d'été", f_use_2: "Appartement / résidence", f_use_3: "Entreprise / installation", f_use_4: "Revendeur / vendeur",
+      ft_dev: "Hydra Ctrl a été développé par Kolleksan Innovation Engineering Inc.", ft_corp: "Mentions légales & Entreprise", ft_priv: "Politique de confidentialité", ft_copy: "© 2026 Kolleksan Innovation Engineering Inc. Tous droits réservés."
+    },
+    ar: {
+      nav_feat: "الميزات", nav_alerts: "التحذيرات", nav_setup: "التركيب", nav_gizlilik: "سياسة الخصوصية", nav_faq: "أسئلة شائعة", nav_quote: "احصل على عرض سعر",
+      hero_badge: "لخزانات المياه المعيارية", hero_title: "<span>قِس. راقب.</span><span class='parla'>تحكم.</span>",
+      hero_desc: "Hydra Ctrl هو جهاز ذكي يتم تركيبه على خزانك وتطبيق متصل به. يقيس مستوى الماء والحرارة والرطوبة واللهب والحركة. يبلغ هاتفك عند حدوث مشكلة.",
+      hero_dl: "حمل التطبيق", hero_ios: "يتم تجهيز نسخة iOS.",
+      lcd_live: "مباشر", lcd_tank: "الخزان المركزي · عينة", lcd_l1: "مستوى الماء", lcd_l2: "الماء في الخزان", lcd_l3: "حرارة الماء", lcd_l4: "حرارة الجو / رطوبة",
+      app_title: "منطقة العينة - الخزان المركزي", app_lbl_lvl: "مستوى", app_cap: "/ سعة 17,034 L", app_lbl_t1: "حرارة الماء", app_lbl_t2: "الماء في الخزان", app_lbl_t3: "حرارة الجو", app_lbl_t4: "الرطوبة", app_lbl_f: "اكتشاف الحريق", app_lbl_m: "اكتشاف الحركة", app_val_a: "نشط",
+      menu_1: "عام", menu_2: "الرسم البياني", menu_3: "الإعدادات", menu_4: "معلومات",
+      feat_badge: "هيكلية التطبيق", feat_title: "خزانك الآن <span class='parla'>في جيبك.</span>", feat_desc: "لا داعي للصعود إلى السطح أو غرفة الميكانيكا لمعرفة كمية المياه المتبقية في الخزان. كل القياسات موجودة على شاشة واحدة، أينما كنت.",
+      f1_t: "المستوى واللتر", f1_d: "يقيس المستشعر بالموجات فوق الصوتية ارتفاع الماء في الخزان؛ ويحول التطبيق ذلك إلى نسبة مئوية ولترات وفقًا لأبعاد خزانك.",
+      f2_t: "الحرارة والرطوبة", f2_d: "يتم قياس درجة حرارة الماء ودرجة الحرارة المحيطة والرطوبة النسبية بشكل منفصل.",
+      f3_t: "الرسوم البيانية التاريخية", f3_d: "راقب التغير في المستوى ودرجة الحرارة بمرور الوقت باستخدام الرسوم البيانية، وشاهد استهلاكك.",
+      f4_t: "تذكير الصيانة", f4_d: "تظهر الأيام المتبقية حتى الصيانة التالية للخزان على الشاشة، ويتم تذكيرك عندما يحين الوقت.",
+      f5_t: "خزانات متعددة", f5_d: "تتبع جميع الخزانات في منزلك أو مكان عملك أو المجمع من حساب واحد.",
+      f6_t: "الضمان والدعم", f6_d: "معلومات الخزان، شروط الضمان، الأسئلة الشائعة، ومقاطع فيديو الاستخدام موجودة داخل التطبيق.",
+      alert_badge: "نظام الإشعارات", alert_title: "إذا حدث شيء، <span class='parla'>كن أول من يعلم.</span>", alert_desc: "يرسل الجهاز القياسات إلى الخادم؛ وعند تجاوز حد معين، يرسل التطبيق إشعارًا إلى هاتفك. أنت تختار التحذيرات التي ستتلقاها من قسم الإعدادات في التطبيق.",
+      a1_t: "تم اكتشاف لهب", a1_d: "بمجرد أن يرى مستشعر اللهب النار، يصدر الجهاز إنذارًا صوتيًا، ويرسل التطبيق إشعارًا حرجًا.", a1_e: "فوري",
+      a2_t: "تم اكتشاف حركة", a2_d: "يتم إبلاغك عند وجود حركة حول الخزان أو في غرفة الميكانيكا.", a2_e: "فوري",
+      a3_t: "فيضان", a3_d: "يحذر عندما يكون الخزان على وشك الامتلاء؛ فتلاحظ حالات مثل عطل العوامة مبكرًا.", a3_e: "مستوى",
+      a4_t: "تفريغ", a4_d: "ينبه عند انخفاض مستوى الماء؛ تتخذ الاحتياطات قبل نفاد الماء.", a4_e: "مستوى",
+      a5_t: "خطر التجمد", a5_d: "ينبه عندما تنخفض درجة حرارة الماء إلى 4 درجات مئوية، ويرسل تحذيرًا حرجًا \"الماء على وشك التجمد\" تحت درجة مئوية واحدة.", a5_e: "≤ 4 °C",
+      a6_t: "خطر البكتيريا", a6_d: "يحذر إذا بقي الماء فوق 25 درجة مئوية لأكثر من ساعتين. هذا النطاق مناسب لتكاثر بكتيريا مثل الفيلقية.", a6_e: "> 25 °C · 2 سا",
+      a7_t: "التعرق والتآكل", a7_d: "يحسب نقطة الندى من درجة الحرارة المحيطة والرطوبة. إذا كان الماء باردًا حتى هذه النقطة، يتعرق سطح الخزان؛ وإذا استمر ذلك طويلاً، يبدأ العفن والتآكل.", a7_e: "نقطة الندى",
+      a8_t: "وقت الصيانة", a8_d: "يذكرك عندما يحين وقت تنظيف وتطهير الخزان.", a8_e: "التقويم",
+      alert_note: "Hydra Ctrl هو نظام معلوماتي؛ ولا يحل محل نظام إنذار السرقة، أو إطفاء الحريق، أو الحماية من الصقيع. يعتمد وصول الإشعارات على اتصال الإنترنت وإعدادات الهاتف.",
+      lock_date: "الثلاثاء 7 أكتوبر", n_now: "الآن", n_3m: "3 د", n_15m: "15 د",
+      n1_t: "تم اكتشاف لهب!", n1_d: "يرى مستشعر الخزان المركزي لهبًا. تحقق فورًا.",
+      n2_t: "تحذير فيضان الخزان", n2_d: "وصل الخزان المركزي إلى مستوى 97%.",
+      n3_t: "تم اكتشاف حركة", n3_d: "هناك حركة حول الخزان المركزي.",
+      setup_badge: "كيف يعمل؟", setup_title: "التركيب في <span class='parla'>ثلاث خطوات.</span>", setup_desc: "بعد التركيب الفعلي للجهاز على خزانك، يمكنك إعداد الشبكة باستخدام هاتفك الذكي في ثوانٍ.",
+      s1_t: "التركيب الفعلي", s1_d: "يتم تركيب مستشعر المستوى على غطاء الخزان، والجهاز بجوار الخزان. يتم تسليم اسم المستخدم وكلمة المرور لك.",
+      s2_t: "اقتران بلوتوث/واي فاي", s2_d: "افتح تطبيق الهاتف، وابحث عن الجهاز عبر البلوتوث واختر شبكة الواي فاي الخاصة بمنزلك أو عملك. يتصل الجهاز بشبكات 2.4 جيجاهرتز.",
+      s3_t: "تفعيل QR", s3_d: "امسح رمز QR الموجود على ملصق الخزان من شاشة \"خزاناتي\". تمت إضافة الخزان إلى حسابك، وتبدأ القياسات في التدفق.",
+      setup_vid_t: "شاهد خطوات التركيب", setup_vid_d: "مقاطع فيديو الاستخدام والتركيب موجودة على يوتيوب.", setup_vid_b: "فتح الفيديوهات",
+      target_badge: "لمن هذا", target_title: "أينما وجد <span class='parla'>خزان.</span>",
+      t1_t: "المنزل المستقل والمنزل الصيفي", t1_d: "تحقق مما إذا كان هناك ماء متبقي في خزان منزلك البعيد وما إذا كان هناك خطر التجمد في الشتاء قبل الذهاب.",
+      t2_t: "الشقق والمجمعات السكنية", t2_d: "يراقب المدير أو الموظف حالة الخزانات في غرفة الميكانيكا من هاتفه؛ يكتشف الفيضان والأعطال مبكرًا.",
+      t3_t: "الشركات والمرافق", t3_d: "اجمع عدة خزانات في حساب واحد؛ احمِ غرفة الميكانيكا الخاصة بك بإنذارات الحريق والدخول غير المصرح به.",
+      faq_badge: "أسئلة شائعة", faq_title: "الأسئلة <span class='parla'>الشائعة.</span>", faq_desc: "إذا لم تجد ما تبحث عنه، اكتب لنا، دعنا نساعدك.",
+      q1: "ما المطلوب لاستخدام Hydra Ctrl؟", a1: "جهاز Hydra Ctrl متصل بخزانك، شبكة WiFi بتردد 2.4 جيجا هرتز، وحساب عميل تم فتحه لك عبر النظام. التطبيق مجاني.",
+      q2: "هل يمكن تركيبه على خزاني الحالي؟", a2: "تم تطوير Hydra Ctrl ليتناسب مع جميع خزانات المياه المعيارية. تواصل معنا من خلال نموذج التسعير لتوضيح مدى ملاءمته لأجهزة خزانك.",
+      q3: "قمت بتغيير المودم أو كلمة مرور WiFi، ماذا أفعل؟", a3: "أدخل الشبكة الجديدة من شاشة الإعدادات > الجهاز > اتصال WiFi في التطبيق. إذا لم يكن مكتوبًا \"وضع إعداد WiFi\" على شاشة الجهاز، فاضغط مع الاستمرار على زر الإعداد في الجهاز لمدة 5 ثوانٍ.",
+      q4: "هل تحذير \"درجة حرارة الماء مرتفعة\" يعني وجود بكتيريا في الماء؟", a4: "لا. النظام يقيس درجة حرارة الماء، وليس البكتيريا. التحذير يوضح أن الماء قد ظل في درجة حرارة مناسبة لتكاثر البكتيريا لفترة طويلة. يوصى بتظليل الخزان وتنظيفه بانتظام؛ صلاحية شرب الماء تحدد فقط من خلال التحليل المخبري.",
+      q5: "رن إنذار اللهب، ماذا يجب أن أفعل؟", a5: "أولاً تأكد من سلامتك وتحقق من المنطقة حول الخزان؛ إذا كان هناك حريق حقيقي، اتصل بالطوارئ فورًا. يمكنك كتم صوت الجهاز بالضغط لفترة وجيزة على زر الإعداد؛ طالما استمر اللهب، يستمر التحذير في التطبيق.",
+      q6: "هل يمكنني مراقبة أكثر من خزان لي من نفس الحساب؟", a6: "نعم. يمكنك إضافة كل خزان إلى حسابك عن طريق مسح رمز QR الموجود على ملصقه من شاشة \"خزاناتي\".",
+      q7: "ماذا يحدث في حالة انقطاع الكهرباء أو الإنترنت؟", a7: "لا يمكن للجهاز إرسال القياسات ولا يتم تحديث القيم في التطبيق. عندما يعود الاتصال، يعيد الجهاز الاتصال تلقائيًا ويستمر في إرسال القياسات.",
+      quote_badge: "التسعير والتواصل", quote_title: "اجعل خزانك <span class='parla'>ذكيًا.</span>", quote_desc: "اكتب عدد خزاناتك وأين ستستخدمها، وسنعود إليك بعرض سعر مناسب.",
+      c_email: "البريد الإلكتروني", c_phone: "الهاتف", c_address: "العنوان", c_copy: "نسخ",
+      f_name: "الاسم واللقب", f_firm: "اسم الشركة / الموقع (اختياري)", f_phone: "الهاتف", f_email: "البريد الإلكتروني", f_use: "مكان الاستخدام", f_count: "عدد الخزانات", f_msg: "رسالتك", f_note: "تُستخدم معلوماتك فقط لإعداد عرض سعر.", f_btn: "طلب عرض سعر",
+      f_use_1: "منزل مستقل / منزل صيفي", f_use_2: "شقة / مجمع", f_use_3: "شركة / مرفق", f_use_4: "تاجر / بائع",
+      ft_dev: "تم تطوير Hydra Ctrl بواسطة شركة Kolleksan Innovation Engineering Inc.", ft_corp: "قانوني ومؤسسي", ft_priv: "سياسة الخصوصية وحماية البيانات", ft_copy: "© 2026 Kolleksan Innovation Engineering Inc. جميع الحقوق محفوظة."
+    }
+  };
+
+  const langSwitcher = document.getElementById('lang-switcher');
+  let currentLang = 'tr';
+
+  function updateLanguage(lang) {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[lang][key]) {
+        el.innerHTML = dict[lang][key];
+      }
+    });
+  }
+
+  langSwitcher.addEventListener('change', function(e) {
+    currentLang = e.target.value;
+    updateLanguage(currentLang);
+  });
+})();
+</script>
+</body>
+</html>
